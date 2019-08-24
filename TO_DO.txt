@@ -1,0 +1,63 @@
+La nostra libreria si chiamerà FEMG e tale sarà il suo namespace.
+(FEMG = finite elements methods on graphs)
+
+Abbiamo individuato numero 2 tipi di problemi:
+
+- Problema autovalori
+- Problema soluzione equazioni ellittiche
+
+Per questo motivo decidiamo di implementare due classi di problemi,
+che chiameremo:
+
+- eigen_problem
+- elliptic_problem
+
+In entrambi i casi avremo di sicuro almeno 4 metodi che corrisponderanno
+a:
+
+- init (importare i dati, setting dei parametri e costruzione della mesh)
+- assembly (assembla matrici e vettori utili per il problema discreto)
+- solve (chiama il solver)
+- export (da definirsi, post processing di tabelle di dati e grafici,
+  matlab o paraview interface)
+
+EIGEN:
+
+0 input: Flag varie soprattutto relative a cosa calcolare, cosa esportare e
+         cosa stampare, quali metodi (approcci al problema) elaborare
+
+         Importazione geometria della mesh e pts (Fittezza (treccani confirmed) della mesh)
+
+         Descriptor di GetFEM (tipo elementi finiti, integrazione...)
+
+         Tolleranze, max iterazioni, solver da usare all'interno degli approcci
+
+         Parametri ulteriori (del problema, operatore su cui fare autovalori,
+         matrice di massa o identità...)
+
+1 Init:  Leggere l'input e salvarsi variabili e booleani utili
+
+         Build mesh
+
+         Build IM FEM
+
+         Build PARAM
+
+2 Assembly: Matrici utili da definirsi (probabilmente solo operatori di RHS e LHS
+            e salvarsi per sicurezza stiffness e mass)
+
+3 Solve:  In base ai parametri chiama gli approcci corrispondenti con i solver
+          segnati
+
+4 Export: Da definirsi
+
+          Per ora controllo primi autovalori e autovettori
+          Autovalori L_gamma e H
+
+          Spy delle matrici e condizionamenti
+
+          Numero iterazioni (poi questo probabilmente andrà post processato a parte)
+
+          Se confrontate con soluzione reale errori (o comunque errori di GetFem)
+
+P.S. Approcci: QR EIG, TEOREMA, SOLO L_GAMMA
