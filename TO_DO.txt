@@ -61,3 +61,6 @@ EIGEN:
           Se confrontate con soluzione reale errori (o comunque errori di GetFem)
 
 P.S. Approcci: QR EIG, TEOREMA, SOLO L_GAMMA
+
+STIAMO PROGRAMMANDO RISCRIVENDO ALLA FINE I FILE SUL MODELLO DEL LORO:
+ANDRà GESTITO NAMESPACE E OVERLAPPING DI NOMI
