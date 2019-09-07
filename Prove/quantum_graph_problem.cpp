@@ -2,11 +2,9 @@
 
 #include "quantum_graph_problem.hpp"
 
-//LIBBRERIE
+//LIBRERIE
 
 namespace getfem{
-
-
 
 // INITIALIZE THE PROBLEM
 
@@ -30,7 +28,6 @@ quantum_graph_problem::init(int argc, char *argv[])
 
      //6. Build the lists of the data of the vertices
      build_vertices_lists();
-
 }
 
 void
@@ -45,7 +42,6 @@ quantum_graph_problem::import_data()
     #ifdef FEMG_VERBOSE_
     std::cout << descr;
     #endif
-
 }
 
 void
@@ -63,7 +59,6 @@ quantum_graph_problem::build_mesh()
     n_branches = n_vertices.size();
 
     ifs.close();
-
 }
 
 void
@@ -120,4 +115,5 @@ quantum_graph_problem::build_param(void)
 void
 quantum_graph_problem::build_vertices_lists(void)
 {
+    //to be defined
 }
