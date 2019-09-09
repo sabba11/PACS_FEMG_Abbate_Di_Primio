@@ -1,8 +1,13 @@
-//Intro si farà dopo
+//GetFEM++ libraries
+#include <gmm/gmm.h>
+#include <gmm/gmm_except.h>
 
+//Standard libraries
+#include <iostream>
+#include <fstream>
+
+//Project libraries
 #include "quantum_graph_problem.hpp"
-
-//LIBRERIE
 
 namespace getfem{
 
@@ -12,7 +17,7 @@ void
 quantum_graph_problem::init(int argc, char *argv[])
 {
      //1. Read the .param filename from standard input
-     PARAM.read_command_line(argc, argv);
+     INPUT.read_command_line(argc, argv);
 
      //2. Import data (algorithm specifications, boundary conditions,...)
      import_data();
@@ -24,7 +29,7 @@ quantum_graph_problem::init(int argc, char *argv[])
      set_im_and_fem();
 
      //5. Build problem parameters
-     build_param();
+     //build_param();
 
      //6. Build the lists of the data of the vertices
      build_vertices_lists();
@@ -37,7 +42,7 @@ quantum_graph_problem::import_data()
     std::cout << "Importing descriptors for the problem..."<< std::endl;
     #endif
 
-    descr.import(PARAM)
+    descr.import(INPUT);
 
     #ifdef FEMG_VERBOSE_
     std::cout << descr;
@@ -106,9 +111,9 @@ quantum_graph_problem::build_param(void)
     #ifdef FEMG_VERBOSE_
     std::cout << "Building parameters for the problem..." << std::endl;
     #endif
-    param.build(INPUT, mf_coeffg, mf_coeffbranchg);
+    //param.build(INPUT, mf_coeffg, mf_coeffbranchg);
     #ifdef FEMG_VERBOSE_
-    std::cout << param;
+    //std::cout << param;
     #endif
 }
 
@@ -117,3 +122,5 @@ quantum_graph_problem::build_vertices_lists(void)
 {
     //to be defined
 }
+
+}// end of namespace

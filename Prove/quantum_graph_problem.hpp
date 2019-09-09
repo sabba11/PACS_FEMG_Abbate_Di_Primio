@@ -7,8 +7,23 @@
 #ifndef FEMG_QUANTUMGRAPHPROBLEM_HPP
 #define FEMG_QUANTUMGRAPHPROBLEM_HPP
 
-// per ora non metto librerie le aggiungerò via via mentre testo
-// o programmo
+//GetFEM++ libraries
+#include <getfem/getfem_import.h>
+#include <getfem/getfem_export.h>
+//#include <getfem/getfem_regular_meshes.h>
+#include <getfem/getfem_mesh.h>
+#include <getfem/getfem_mesh_fem.h>
+#include <getfem/getfem_mesh_im.h> //was not present and the code worked...
+
+//Standard libraries
+#include <vector>
+
+//Project headers
+#include "type_aliases.hpp"
+#include "mesh1d_prova_new_order.hpp"
+#include "node.hpp"
+#include "descr_qg.hpp"
+//#include "param_qg.hpp" to be defined
 
 namespace getfem {
 // Abstract class of a generic differential problem defined on a graph
@@ -18,13 +33,16 @@ public:
 	void init(int argc, char *argv[]);
 
 	//Assembles problem matrices and vectors.
-	void assembly(void) = 0;
+	virtual void assembly(void) = 0;
 
 	//Solves the differential problem. Returns true if successful.
-	bool solve() = 0;
+	virtual bool solve() = 0;
 
 	//Exports the solution for external postprocessing.
-	void export(const string & suff = "") = 0;
+	virtual void sol_export(const std::string & suff = "") = 0;
+
+	//Virtual destructor.
+	virtual ~quantum_graph_problem() {}
 
 protected:
 	//Protected constructor: not public since abstract class objects cannot
@@ -59,7 +77,7 @@ protected:
 	descr_qg descr;
 
 	// Physical parameters (dimensionless)
-	param_qg param;
+	//param_qg param;
 
 
 	// GRAPH PARAMETERS
@@ -88,8 +106,8 @@ protected:
 
 	// OBJECTS OF THE GRAPH
 
-	// // List of BC nodes of the graph
-	// std::vector<node> BCg;
+	// List of BC nodes of the graph
+	std::vector<node> BCg;
 	//
 	// // List of junction nodes of the graph
 	// std::vector<node> Jg;
@@ -107,7 +125,7 @@ protected:
 	sparse_matrix_type A;
 
 	// Mass Matrix of the discrete problem
-	sparse_matrix_type M;
+	//sparse_matrix_type M;
 
 	// Array of unknowns for the discrete problem
 	vector_type U;
@@ -132,11 +150,6 @@ protected:
 
 	// Build the lists of the data of the vertices
 	void build_vertices_lists(void);
-
-	// Build the matrices and vertices
-	void assembly_matA(void);
-	void assembly_matM(void);
-	void assembly_rhs(void);
 
 }; /* end of class quantum_graph_problem */
 
