@@ -4,9 +4,11 @@
 #include <getfem/getfem_assembling.h>
 #include <gmm/gmm_condition_number.h>
 #include <gmm/gmm_except.h>
+#include <gmm/gmm_iter_solvers.h>
 
 // Standard libraries
 #include <algorithm>
+#include <map>
 
 // Project headers
 #include "eigen_problem.hpp"
@@ -24,10 +26,8 @@ void eigen_problem::assembly(void) {
 }
 
 void eigen_problem::assembly_matA() {
-	// Caveat! It still lacks computation of n_origvert and n_extdvert
-	size_type n_totalpoints = 21;
-	A.resize(n_totalpoints, n_totalpoints);
-	vector_type coeff_val(n_totalpoints, 1);
+	A.resize(n_totalvert, n_totalvert);
+	vector_type coeff_val(n_totalvert, 1);
 	getfem::asm_stiffness_matrix_for_laplacian(A, mimg, mf_Ug, mf_coeffg, coeff_val);
 
 	#ifdef FEMG_VERBOSE_
@@ -38,9 +38,7 @@ void eigen_problem::assembly_matA() {
 }
 
 void eigen_problem::assembly_matM() {
-	// Caveat! It still lacks computation of n_origvert and n_extdvert
-	size_type n_totalpoints = 21;
-	M.resize(n_totalpoints, n_totalpoints);
+	M.resize(n_totalvert, n_totalvert);
 	getfem::asm_mass_matrix(M, mimg, mf_Ug, mf_coeffg);
 
 	#ifdef FEMG_VERBOSE_
@@ -57,23 +55,41 @@ bool eigen_problem::solve(void) {
 	#endif
 	try {
 		//Same caveat as above.
-		size_type n_totalpoints = 21;
 		gmm::clean(A, 1E-10);
 		gmm::clean(M, 1E-10);
-		dense_matrix_type inverse_mass(n_totalpoints, n_totalpoints);
+		dense_matrix_type inverse_mass(n_totalvert, n_totalvert);
 		gmm::copy(M, inverse_mass);
 		scalar_type cond_number = gmm::condition_number(M);
 		std::cout << "[eigen_problem] The mass matrix M has condition number " << cond_number << std::endl;
 		gmm::lu_inverse(inverse_mass);
-		dense_matrix_type H (n_totalpoints, n_totalpoints);
+		dense_matrix_type H (n_totalvert, n_totalvert);
 		gmm::add(A, M, H);
-		dense_matrix_type eig_M(n_totalpoints, n_totalpoints);
+		eig_M.resize(n_totalvert, n_totalvert);
 		gmm::mult(inverse_mass, H, eig_M);
 		double tol = 1E-6;
-		vector_type aux(n_totalpoints, 1);
+		// Initial guess for all eigenvalues is 1.
+		vector_type aux(n_totalvert, 1);
 		eigvals.swap(aux);
-		gmm::implicit_qr_algorithm(eig_M, eigvals, tol);
-		std::sort(eigvals.begin(), eigvals.end());
+		eigvects.resize(n_totalvert, n_totalvert);
+		gmm::scale(A, 5);
+		gmm::implicit_qr_algorithm(A, eigvals, eigvects, tol);
+		std::multimap< scalar_type, vector_type > eigpairs;
+		for (int i = 0; i < n_totalvert; i++) {
+			vector_type aux_v;
+			for (int j = 0; j < n_totalvert; j++) {
+				aux_v.push_back(eigvects(j, i));
+			}
+			auto eigpair = std::make_pair(eigvals[i], aux_v);
+			eigpairs.insert(eigpair);
+		}
+		auto it = eigpairs.begin();
+		for(int k = 0; k < 6; k++) {
+			std::cout << "Eigenvalue: " << it->first << std::endl;
+			std::cout << "Eigenvector: " << std::endl;
+			for (auto it2 : it->second)
+				std::cout << it2 << std::endl;
+			it++;
+		}
 	}
 	GMM_STANDARD_CATCH_ERROR;
 	return true;

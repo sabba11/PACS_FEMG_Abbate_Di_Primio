@@ -62,6 +62,8 @@ quantum_graph_problem::build_mesh()
     import_pts_file(ifs, meshg, BCg, n_vertices, descr.MESH_TYPEG);
 
     n_branches = n_vertices.size();
+	n_totalvert = meshg.nb_points();
+	// n_origvert = 
 
     ifs.close();
 }

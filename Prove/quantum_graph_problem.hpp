@@ -76,47 +76,32 @@ protected:
 	// Algorithm description strings (mesh files, FEM types, solver info...)
 	descr_qg descr;
 
-	// Physical parameters (dimensionless)
-	//param_qg param;
-
 
 	// GRAPH PARAMETERS
 
-	// Number of vertices per branch
+	// Number of vertices in each branch
 	vector_size_type n_vertices;
 
 	// Number of branches
 	size_type n_branches;
 
-	//// Number of boundary vertices
-	// size_type n_boundvert;
-	//
-	//// Number of internal vertices
-	// size_type n_intvert;
-
 	// Number of original vertices
 	size_type n_origvert;
 
-	// Number of extended vertices
-	size_type n_extdvert;
-
-	//// Number of degrees of freedom
-	// dofg dof;
+	// Number of total (original and extended) vertices
+	size_type n_totalvert;
 
 
 	// OBJECTS OF THE GRAPH
 
 	// List of BC nodes of the graph
 	std::vector<node> BCg;
-	//
-	// // List of junction nodes of the graph
-	// std::vector<node> Jg;
 
 	// List of original vertices of the graph
-	std::vector<node> OGg;
+	// std::vector<node> OGg;
 
 	// List of extended vertices of the graph
-	std::vector<node> EXg;
+	// std::vector<node> EXg;
 
 
 	// MATRIXES AND VECTORS
@@ -124,14 +109,8 @@ protected:
 	// Matrix for the LHS of the discrete problem
 	sparse_matrix_type A;
 
-	// Mass Matrix of the discrete problem
-	//sparse_matrix_type M;
-
 	// Array of unknowns for the discrete problem
 	vector_type U;
-
-	// Source term of the problem (RHS)
-	vector_type F;
 
 
 	// AUX METHOD FOR INIT

@@ -27,15 +27,18 @@ private:
 	// Mass matrix for the discrete problem
 	sparse_matrix_type M;
 
-	// Possibly useful to save H?
-	// sparse_matrix_type H;
+	// Auxiliary matrix (final LHS)
+	dense_matrix_type eig_M;
 
 	// Vector to save eigenvalues
 	vector_type eigvals;
 
+	// Data structure to save eigenvectors
+	dense_matrix_type eigvects;
+
 	//Auxiliary methods for assembling procedure
 	void assembly_matA(void);
 	void assembly_matM(void);
-}; //end of eigen problem
-} //end of namespace 
+};
+} //end of namespace
 #endif
