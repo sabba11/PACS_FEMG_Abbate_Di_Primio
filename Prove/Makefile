@@ -14,20 +14,20 @@ CPPFLAGS += $(INCLUDES)
 
 all: main
 
-main: main.o 
-	$(CXX) -o main main.o $(LDLIBS)
+main: main.o quantum_graph_problem.o eigen_problem.o
+	$(CXX) -o main main.o quantum_graph_problem.o eigen_problem.o $(LDLIBS)
 
-main.o: main.cpp reader_femg.hpp 
+main.o: main.cpp eigen_problem.hpp
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c main.cpp
 
-clean: 
+quantum_graph_problem.o: quantum_graph_problem.cpp quantum_graph_problem.hpp node.hpp mesh1d_prova_new_order.hpp descr_qg.hpp type_aliases.hpp
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c quantum_graph_problem.cpp
+
+eigen_problem.o: eigen_problem.cpp eigen_problem.hpp
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c eigen_problem.cpp
+
+clean:
 	rm *.o
 
 distclean: clean
 	rm main
-
-
-
-
-
-
