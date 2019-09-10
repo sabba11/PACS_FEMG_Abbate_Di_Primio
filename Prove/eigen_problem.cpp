@@ -105,7 +105,7 @@ void eigen_problem::sol_export(const std::string & suff) {
  	unsigned i = 0;
  	for (auto it = eigpairs.begin(); it != eigpairs.end(); it++) {
 		std::ostringstream file_name_builder;
- 		file_name_builder << "export/eigenvector-" << it->first << "-" << i << ".U";
+ 		file_name_builder << "export/star_5/eigenvector-" << it->first << "-" << i << ".U";
  		std::fstream f(file_name_builder.str(), std::ios::out);
 		if (!f)
 			std::cerr << "Error opening file " << i << std::endl;
@@ -117,7 +117,7 @@ void eigen_problem::sol_export(const std::string & suff) {
 	}
 
  	// when the 2nd arg is true, the mesh is saved with the |mf|
-	mf_Ug.write_to_file("export/solution.mf", true);
+	mf_Ug.write_to_file("export/star_5/solution.mf", true);
 	return;
 }
 }// end of namespace
