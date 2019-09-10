@@ -4,6 +4,7 @@
 #define FEMG_EIGEN_PROBLEM_HPP
 
 #include "quantum_graph_problem.hpp"
+#include <map>
 
 namespace getfem {
 class eigen_problem : public getfem::quantum_graph_problem {
@@ -35,6 +36,9 @@ private:
 
 	// Data structure to save eigenvectors
 	dense_matrix_type eigvects;
+
+	// Map to save eigenpairs
+	std::multimap< scalar_type, vector_type > eigpairs;
 
 	//Auxiliary methods for assembling procedure
 	void assembly_matA(void);

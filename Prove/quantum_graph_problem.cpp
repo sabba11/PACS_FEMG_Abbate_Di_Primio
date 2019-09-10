@@ -9,7 +9,7 @@
 //Project libraries
 #include "quantum_graph_problem.hpp"
 
-namespace getfem{
+namespace getfem {
 
 // INITIALIZE THE PROBLEM
 
@@ -59,11 +59,10 @@ quantum_graph_problem::build_mesh()
     std::ifstream ifs(descr.MESH_FILEG);
     GMM_ASSERT1(ifs.good(),"Unable to read from file " << descr.MESH_FILEG);
 
-    import_pts_file(ifs, meshg, BCg, n_vertices, descr.MESH_TYPEG);
+    import_pts_file(ifs, meshg, BCg, n_origvert, n_vertices, descr.MESH_TYPEG);
 
     n_branches = n_vertices.size();
 	n_totalvert = meshg.nb_points();
-	// n_origvert = 
 
     ifs.close();
 }

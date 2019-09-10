@@ -73,12 +73,10 @@ bool eigen_problem::solve(void) {
 		eigvects.resize(n_totalvert, n_totalvert);
 		gmm::scale(A, 5);
 		gmm::implicit_qr_algorithm(A, eigvals, eigvects, tol);
-		std::multimap< scalar_type, vector_type > eigpairs;
 		for (int i = 0; i < n_totalvert; i++) {
 			vector_type aux_v;
-			for (int j = 0; j < n_totalvert; j++) {
+			for (int j = 0; j < n_totalvert; j++)
 				aux_v.push_back(eigvects(j, i));
-			}
 			auto eigpair = std::make_pair(eigvals[i], aux_v);
 			eigpairs.insert(eigpair);
 		}
@@ -96,11 +94,30 @@ bool eigen_problem::solve(void) {
 }
 
 void eigen_problem::sol_export(const std::string & suff) {
-	// Temporary code.
+// Temporary code.
 	std::cout << "[eigen_problem] Printing eigenvalues..." << std::endl;
 	for(int i = 0; i < eigvals.size(); ++i)
 	   std::cout << eigvals[i] << std::endl;
+	std::cout << "origvert " << n_origvert << std::endl;
+	std::cout << "totalvert " << n_totalvert << std::endl;
+
+	// Exporting routine to MATLAB interface.
+ 	unsigned i = 0;
+ 	for (auto it = eigpairs.begin(); it != eigpairs.end(); it++) {
+		std::ostringstream file_name_builder;
+ 		file_name_builder << "export/eigenvector-" << it->first << "-" << i << ".U";
+ 		std::fstream f(file_name_builder.str(), std::ios::out);
+		if (!f)
+			std::cerr << "Error opening file " << i << std::endl;
+ 		for (unsigned j = 0; j < gmm::vect_size(it->second); ++j) {
+   			f << it->second[j] << "\n";
+		}
+		i++;
+		f.close();
+	}
+
+ 	// when the 2nd arg is true, the mesh is saved with the |mf|
+	mf_Ug.write_to_file("export/solution.mf", true);
 	return;
 }
-
 }// end of namespace
