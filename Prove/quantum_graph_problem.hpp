@@ -91,6 +91,9 @@ protected:
 	// Number of total (original and extended) vertices
 	size_type n_totalvert;
 
+	// Discretization parameter
+	scalar_type mesh_step;
+
 
 	// OBJECTS OF THE GRAPH
 
