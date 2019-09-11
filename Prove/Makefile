@@ -6,7 +6,7 @@ CXXFLAGS += -std=c++11
 
 INCLUDES = -I$(BGLGEOM_DIR)/include -I. -I$(mkBGLInc) -I$(EIGEN_INC_DIR) -I$(VTK_INC_DIR) -I$(GETFEM_INC_DIR)
 
-CPPFLAGS += $(INCLUDES)
+CPPFLAGS += $(INCLUDES) -D FEMG_VERBOSE_
 
 .PHONY = all clean distclean
 
