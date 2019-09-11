@@ -143,7 +143,7 @@ void eigen_problem::sol_export(const std::string & suff) {
 
 	// Exporting routine to MATLAB interface.
 	// Executing this code requires GetFEM++-MATLAB interface.
- 	unsigned i = 0;
+ 	unsigned i = 10000;
  	for (auto it = eigpairs.begin(); it != eigpairs.end(); it++) {
 		std::ostringstream file_name_builder;
 		std::string filename = descr.MESH_FILEG;
@@ -153,14 +153,13 @@ void eigen_problem::sol_export(const std::string & suff) {
 			graph_name += filename[idx];
 			idx++;
 		}
-		//boost::filesystem::create_directory("export");
- 		file_name_builder << "export/eigenvector-" << it->first << "-" << i + 1 << "_" << descr.COMP_METHOD << ".U";
+ 		file_name_builder << "export/" << i << "-eigenvector-" << it->first << "_" << descr.COMP_METHOD << ".U";
 		#ifdef FEMG_VERBOSE_
-		std::cout << "[eigen_problem] Exporting eigenvector file " << i + 1 << "..." << std::endl;
+		std::cout << "[eigen_problem] Exporting eigenvector file " << i << "..." << std::endl;
 		#endif
  		std::fstream f(file_name_builder.str(), std::ios::out);
 		if (!f)
-			std::cerr << "Error opening file " << i + 1 << std::endl;
+			std::cerr << "Error opening file " << i << std::endl;
  		for (unsigned j = 0; j < gmm::vect_size(it->second); ++j) {
    			f << it->second[j] << "\n";
 		}
