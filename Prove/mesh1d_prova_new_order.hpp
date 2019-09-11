@@ -59,6 +59,7 @@
 
 #include <unordered_set>
 #include <node.hpp>
+#include <cmath>
 
 namespace getfem {
 
@@ -79,6 +80,7 @@ import_pts_file(
 		getfem::mesh & mh1D,
 		std::vector<getfem::node> &  BCList,
 		size_type & n_original,
+		scalar_type & mesh_step,
 		VEC & Nn,
 		const std::string & MESH_TYPE
 		)
@@ -237,7 +239,11 @@ import_pts_file(
 		} /* end of inner for */
 
 	} /* end of outer while (end of an branch) */
-
+		mesh_step = 0;
+		for (unsigned k = 0; k < rpoints[0].size(); k++) {
+			mesh_step += (rpoints[0][k]-spoints[0][k])*(rpoints[0][k]-spoints[0][k]);
+		}
+		mesh_step = std::sqrt(mesh_step);
 		std::set<base_node> realpoints(rpoints.begin(), rpoints.end());
 		n_original = realpoints.size();
 
