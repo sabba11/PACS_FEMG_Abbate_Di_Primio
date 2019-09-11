@@ -35,6 +35,15 @@ namespace getfem {
 		//Residue tolerance (for iterative solvers)
 		scalar_type TOL;
 
+		//Operator whose eigenvalues are computed (for eigen_problem)
+		std::string OPERATOR;
+
+		//Rescaling factor (for eigen_problem)
+		std::string RESCALING_FACTOR;
+
+		//Computational method (for eigen_problem)
+		std::string COMP_METHOD;
+
 		//Input file
 		ftool::md_param FILE_;
 
@@ -54,6 +63,12 @@ namespace getfem {
 			std::cout << " MAX ITERATIONS            : " << descr.MAX_ITER    << std::endl;
 			std::cout << " TOLERANCE                 : " << descr.TOL         << std::endl;
 			std::cout << "--------------------------------------------------" << std::endl;
+			std::cout << " Eigen problem specifications:                    " << std::endl;
+			std::cout << "--------------------------------------------------" << std::endl;
+			std::cout << " OPERATOR                  : " << descr.OPERATOR    << std::endl;
+			std::cout << " RESCALING FACTOR          : " << descr.RESCALING_FACTOR    << std::endl;
+			std::cout << " COMPUTATIONAL METHOD      : " << descr.COMP_METHOD    << std::endl;
+			std::cout << "--------------------------------------------------" << std::endl;
 		return out;
 		} //end of operator<<
 
@@ -72,10 +87,12 @@ namespace getfem {
 			if(FEM_TYPEG_DATA == "") FEM_TYPEG_DATA = "FEM_PK(1,1)";
 
 			SOLVE_METHOD = FILE_.string_value("SOLVE_METHOD", "Name of solver");
-			if (SOLVE_METHOD != "SuperLU") { // iterative solver
-				MAX_ITER  = FILE_.int_value("MAX_ITER", "Max number of sub-iterations");
+			MAX_ITER  = FILE_.int_value("MAX_ITER", "Max number of sub-iterations");
 			TOL = FILE_.real_value("TOL"); if (TOL == 0.) TOL = 2.0e-10;
-			}
+
+			OPERATOR  = FILE_.string_value("OPERATOR", "Operator");
+			RESCALING_FACTOR  = FILE_.string_value("RESCALING_FACTOR", "Rescaling factor");
+			COMP_METHOD  = FILE_.string_value("COMP_METHOD", "Computational method");
 			OUTPUT = FILE_.string_value("OUTPUT","Output Directory");
 		} // end of import
 	}; // end of descr_qg struct
