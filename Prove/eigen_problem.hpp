@@ -28,14 +28,11 @@ private:
 	// Mass matrix for the discrete problem
 	sparse_matrix_type M;
 
+	// Laplacian matrix of the extended graph
+	sparse_matrix_type L;
+
 	// Auxiliary matrix (final LHS)
 	dense_matrix_type eig_M;
-
-	// Vector to save eigenvalues
-	vector_type eigvals;
-
-	// Data structure to save eigenvectors
-	dense_matrix_type eigvects;
 
 	// Map to save eigenpairs
 	std::multimap< scalar_type, vector_type > eigpairs;
@@ -43,6 +40,7 @@ private:
 	//Auxiliary methods for assembling procedure
 	void assembly_matA(void);
 	void assembly_matM(void);
+	void assembly_matL(void);
 };
 } //end of namespace
 #endif
