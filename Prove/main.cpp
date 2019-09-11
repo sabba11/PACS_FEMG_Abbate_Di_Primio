@@ -1,11 +1,9 @@
-//Comment this if you do not want verbose mode on
-#define FEMG_VERBOSE_
-
 #include "eigen_problem.hpp"
 
 using namespace getfem;
 
 int main (int argc, char* argv[]) {
+
 	try {
 		eigen_problem EP;
 
@@ -20,6 +18,7 @@ int main (int argc, char* argv[]) {
 
 		//Export the solution (test vrs.), just prints eigvals
 		EP.sol_export("");
+
 	}
 
 	GMM_STANDARD_CATCH_ERROR;
