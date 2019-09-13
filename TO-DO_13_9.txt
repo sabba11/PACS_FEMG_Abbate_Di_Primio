@@ -1,0 +1,12 @@
+- Ordinare cartelle e indentare funzioni (minchia che lavoro - Abba)
+- Sistemare export (creazione folder) e possibile post-processing (esempio andamento numero di oscillazioni
+negli autovettori) (Dipa)
+- Macro per dimensione di output del grafo (2d per vedere autovettori)
+- Eliminare metodo di scaling con 1/h?
+- Rifinire Barabasi Albert (Abba)
+
+
+DOMANDE PER PZ: Mesh non uniforme e con lati differenti?
+Termine v(x) in potenziale per Hamiltoniano?
+Pencil Theorem?
+Problema funzioni di base non normali (bordo e giunture) autovalori moltiplicati per norma in tali punti? (ci pensiamo su)
