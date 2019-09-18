@@ -110,7 +110,7 @@ protected:
 	// MATRIXES AND VECTORS
 
 	// Matrix for the LHS of the discrete problem
-	sparse_matrix_type A;
+	dense_matrix_type A;
 
 	// Array of unknowns for the discrete problem
 	vector_type U;

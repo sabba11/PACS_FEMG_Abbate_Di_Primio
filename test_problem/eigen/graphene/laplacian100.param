@@ -1,0 +1,79 @@
+%=======================================================================================
+%  GENERAL FLAGS
+%=======================================================================================
+% Flag to export results
+EXPORT = 1;
+% Directory in which solutions will be exported, leave empty to choose
+% the directory containing main.
+OUTPUT = 'graphene/';
+%===================================
+%  MESH
+%===================================
+% Path to import the 1d list of points
+MESH_FILEG = '../../data_builder/data/simple_graphene_1_100.pts'
+%===================================
+%  GETFEM DESCRIPTORS
+%===================================
+% GetFem type for the 1D mesh
+MESH_TYPEG  = 'GT_PK(1,1)';
+% GetFem type for the 1D Finite Element Methods
+FEM_TYPEG   = 'FEM_PK(1,1)';
+FEM_TYPEG_DATA = 'FEM_PK(1,1)';
+% GetFem type for the 1D Integration Method
+IM_TYPEG   = 'IM_GAUSS1D(7)';
+%
+% Solvers: specify here possible keywords
+% direct:    'SuperLU'
+% iterative: 'CG','BiCGstab','GMRES','QMR','LSCG'
+SOLVE_METHOD = 'SuperLU';
+% Maximum number of iterations for iterative solvers
+MAX_ITER  = 100;
+% Residual for conjugate gradient
+TOL = 1E-12;
+%=================================================================
+% PROBLEM FLAGS (consider only the problem of interest)
+%=================================================================
+% 1. EIGENVALUE PROBLEM FLAGS
+%=================================================================
+% Operator whose eigenvalues are computed
+% OPERATOR: 'Laplacian', 'Hamiltonian'
+OPERATOR = 'Laplacian'
+
+% Computational method
+% COMP_METHOD: 'QR', 'pencil_thm'
+COMP_METHOD = 'QR'
+%=================================================================
+% 2. ELLIPTIC PROBLEM FLAGS
+%=================================================================
+% Function to describe the source term f
+% SOURCE_TERM should contain a L^2(R^d) function evaluated at the points of the mesh.
+% Alternatively, SOURCE_TERM can be a set of default functions:
+% 'unit_load' represents a unit_load on one vertex of the mesh (asked at runtime)
+% tbc...
+SOURCE_TERM = 'unit_load'
+
+% Function to describe the potential v
+% POTENTIAL_TERM should contain a L^inf(R^d) strictly positive to be evaluated at the points of the mesh.
+% Alternatively, POTENTIAL_TERM can be a set of default functions:
+% 'constant' represents a constant (equal to 1) potential on each point of the graph
+POTENTIAL_TERM = 'constant'
+%==============================================
+%  DIMENSIONLESS PARAMETER
+%==============================================
+% empty for now
+%===================================
+%  BOUNDARY CONDITIONS
+%===================================
+% Faces:   x=0  x=L  y=0  y=L  z=0  z=L
+% BC labels (DIR / MIX)
+% BClabel = 'MIX MIX  MIX  MIX  MIX  MIX'
+% BC values
+% BCvalue = '0.0 0.0  0.0  0.0  0.0  0.0'
+% Coefficient for MIX condition
+% BETA = 2.22E-6;
+% Outside interstitial pressure for MIX condition
+% P0 = -1;
+%===================================
+%  FLAG FOR FIXED POINT METHOD (FPM)
+%===================================
+% empty for now

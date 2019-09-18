@@ -39,7 +39,7 @@ TOL = 1E-6;
 
 % Operator whose eigenvalues are computed
 % OPERATOR: 'Laplacian', 'Hamiltonian'
-OPERATOR = 'Hamiltonian'
+OPERATOR = 'Laplacian'
 
 % Factor to adjust the problem with respect to mesh thickness
 % RESCALING_FACTOR: 'mesh_step', 'mass_matrix' (see readme for details)

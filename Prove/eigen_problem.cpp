@@ -1,10 +1,17 @@
 // Source file containing definitions for class eigen_problem.
 
 // GetFEM++ libraries
+#define GMM_USES_LAPACK
 #include <getfem/getfem_assembling.h>
+
 #include <gmm/gmm_condition_number.h>
+
+
 #include <gmm/gmm_except.h>
+
 #include <gmm/gmm_iter_solvers.h>
+
+//#include <gmm/gmm_lapack_interface.h>
 
 // Standard libraries
 #include <algorithm>
@@ -78,7 +85,7 @@ bool eigen_problem::solve(void) {
 		try {
 			dense_matrix_type eigvects(n_totalvert, n_totalvert);
 			// Initial guess for all eigenvalues is 1.
-			vector_type eigvals(n_totalvert, 1);
+			std::vector<double> eigvals(n_totalvert, 1);
 
 			// Check if this can be done a priori.
 			if (descr.RESCALING_FACTOR == "mesh_step") {
@@ -89,8 +96,8 @@ bool eigen_problem::solve(void) {
 				dense_matrix_type aux_H(n_totalvert, n_totalvert);
 				gmm::copy(M, inverse_mass);
 				gmm::copy(A, aux_H);
-				scalar_type cond_number = gmm::condition_number(M);
-				std::cout << "[eigen_problem] The mass matrix M has condition number " << cond_number << std::endl;
+	//		scalar_type cond_number = gmm::condition_number(M);
+		//	std::cout << "[eigen_problem] The mass matrix M has condition number " << cond_number << std::endl;
 				gmm::lu_inverse(inverse_mass);
 				gmm::mult(inverse_mass, aux_H, A);
 			}
@@ -99,7 +106,8 @@ bool eigen_problem::solve(void) {
 				std::cout << "[eigen_problem] Invalid rescaling factor descriptor." << std::endl;
 
 			scalar_type tol = descr.TOL;
-			gmm::implicit_qr_algorithm(A, eigvals, eigvects, tol);
+			gmm::implicit_qr_algorithm(A, eigvals, tol);
+			gmm::geev_interface_right(A,eigvals,eigvects);
 			for (int i = 0; i < n_totalvert; i++) {
 				vector_type aux_v;
 				for (int j = 0; j < n_totalvert; j++)
@@ -109,6 +117,18 @@ bool eigen_problem::solve(void) {
 			}
 			// Temporary printing routine.
 			auto it = eigpairs.begin();
+
+      // for(int k = 0; k < 6; k++) {
+			// std::vector<double> i_hope_null(n_totalvert);
+			// gmm::mult(A,it->second,i_hope_null);
+			// gmm::scale(it->second,(it->first)*(-1));
+			// gmm::add(it->second,i_hope_null);
+			// std::cout<<"Printing 21 porcoddio null values" << std::endl;
+      // for (auto null_value : i_hope_null)
+			//     std::cout << null_value << std::endl;
+			// it++;
+      // }
+			it = eigpairs.begin();
 			for(int k = 0; k < 6; k++) {
 				std::cout << "Eigenvalue: " << it->first << std::endl;
 				std::cout << "Eigenvector: " << std::endl;
