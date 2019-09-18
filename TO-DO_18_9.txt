@@ -24,3 +24,5 @@ TOGLIERE SIMPLE DAI NOMI (anche poi nei rispettivi input.param)
 - sistemare README
 
 - controllare di non avere perso nulla
+
+- doxyfile too
