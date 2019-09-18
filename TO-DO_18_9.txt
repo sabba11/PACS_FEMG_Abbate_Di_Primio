@@ -20,3 +20,7 @@ TOGLIERE SIMPLE DAI NOMI (anche poi nei rispettivi input.param)
 - templetare ovunque dimensioni 2/3 del codice
 
 - differential problem
+
+- sistemare README
+
+- controllare di non avere perso nulla
