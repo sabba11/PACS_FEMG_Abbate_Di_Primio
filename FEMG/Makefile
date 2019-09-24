@@ -77,9 +77,9 @@ install:
 
 
 clean:
-	-rm -rv $(BUILD_DIR)
+	-rm -rv -f $(BUILD_DIR)
 
 
 distclean: clean
-	-rm -rv $(LIB_DIR) $(DATA_DIR)
+	-rm -rv -f $(LIB_DIR) $(DATA_DIR)
 
