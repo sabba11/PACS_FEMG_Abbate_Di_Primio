@@ -1,15 +1,15 @@
 % Star graph generator
-% 
+%
 % This script generates a star graph in a .txt (giving edges with initial and
 % final points coordinates with boundary conditions afterwards).
 % It is a 2 dimensional graph in a 3d points setting put in the box
 % [0,L;0,L].
 % Then the star will be translate of (x_trans,y_trans).
-% 
+%
 % Input parameters:
 %      n      = points of the star (at least 3 to obtain a Y conf)
 % out_filename = name of the output file. Put it in the ./data folder.
-%     ndim    = dimension of the problem (in this case is 3 even if the 
+%     ndim    = dimension of the problem (in this case is 3 even if the
 % final star will be only on one plane)
 %     L       = dimension of the box in which the star will be contained
 % x_trans, y_trans = setting for translation
@@ -24,7 +24,7 @@ n = 4;
 % Setting dimension of the problem
 ndim = 3;
 % Output file name
-out_filename = '../data/simple_star.txt';
+out_filename = '../data/star.txt';
 
 % Box lenght
 L = 2;
@@ -75,4 +75,3 @@ FEMG_plot3d_graph(Edges,points)
 
 
 dlmwrite(out_filename, Finaltext, 'delimiter', '');
-

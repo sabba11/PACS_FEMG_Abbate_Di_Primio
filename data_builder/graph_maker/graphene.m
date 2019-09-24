@@ -1,5 +1,5 @@
 % Graphene graph generator
-% 
+%
 % This script generates a simple graphene graph in a .txt (giving edges with
 % initial and final points coordinates with boundary conditions afterwards).
 % It is a 2 dimensional graph in the box [0,L;0,L] made by two exagon
@@ -23,7 +23,7 @@ n = 12;
 % Setting dimension of the problem
 ndim = 3;
 % Output file name
-out_filename = '../data/simple_graphene_2.txt';
+out_filename = '../data/graphene.txt';
 
 % Box lenght
 L = 5;
@@ -35,7 +35,7 @@ points = zeros(n,2);
 
 for i= 1:6
     points(i,:) = [L/5+L/5*cos((i-1)*2*pi/6),L/2+L/5*sin((i-1)*2*pi/6)];
-    points(i+6,:) = [4*L/5+L/5*cos((i-1)*2*pi/6),L/2+L/5*sin((i-1)*2*pi/6)];    
+    points(i+6,:) = [4*L/5+L/5*cos((i-1)*2*pi/6),L/2+L/5*sin((i-1)*2*pi/6)];
 end
 
 points = FEMG_augment_dim(points);

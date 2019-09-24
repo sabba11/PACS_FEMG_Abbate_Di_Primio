@@ -22,7 +22,7 @@ nbif = 4;
 % Setting dimension of the problem
 ndim = 3;
 % Output file name
-out_filename = '../data/simple_tree_edge.txt';
+out_filename = '../data/tree_edge.txt';
 
 % Box lenght: unitary
 L = 1;
