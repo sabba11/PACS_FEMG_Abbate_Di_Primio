@@ -90,6 +90,8 @@ import_pts_file(
 	size_type last_added = 0; // auxiliary counter
 	Nn.resize(0); Nn.clear();
 	mh1D.clear();
+	bool dim_check = true;
+	unsigned dim_prob;
 
 	ist.precision(16);
 	ist.seekg(0); ist.clear();
@@ -145,8 +147,8 @@ import_pts_file(
 					}
 					else
 						GMM_ASSERT1(0, "More than 2 BC found on this arc!");
-				}
-				else if (BCtype.compare("MIX") == 0) {
+			}
+			else if (BCtype.compare("MIX") == 0) {
 					bgeot::get_token(ist, value, 1023);
 					if (bcflag == 1) {
 						BCA.label = BCtype;
@@ -160,8 +162,8 @@ import_pts_file(
 						//BCB.ind = globalBoundaries;
 						globalBoundaries++;
 					}
-				}
-				else if (BCtype.compare("INT") == 0) {
+			}
+			else if (BCtype.compare("INT") == 0) {
 					if (bcflag == 1) {
 						bcintI++;
 						BCA.label = BCtype;
@@ -174,8 +176,8 @@ import_pts_file(
 					}
 					else
 						GMM_ASSERT1(0, "More than 2 BC found on this arc!");
-				}
-				else
+			}
+			else
 					GMM_ASSERT1(0, "Unknown Boundary condition");
 
 			} /* end of "BC" case */
@@ -189,14 +191,34 @@ import_pts_file(
 				while ( (isdigit(tmp[0]) != 0) || tmp[0] == '-' || tmp[0] == '+' || tmp[0] == '.'){
 					tmpv[d++] = stof(tmp);
 					bgeot::get_token(ist, tmp, 1023);
-				}
-                if (d != 4) GMM_ASSERT1(0, "Points must have 3 coordinates - number of coordinates:" << d);
-
-				base_node tmpn(tmpv[1], tmpv[2]);
-				//base_node tmpn(tmpv[1], tmpv[2], tmpv[3]);
-				lpoints.push_back(tmpn);
-				if (tmp.compare("END_ARC") == 0) { thend = true; Nn[Nb-1]--; }
 			}
+      if (dim_check){
+				if (d == 4 || d == 3)
+				  dim_prob = d;
+				else
+				  GMM_ASSERT1(0, "Points must have 3 or 2 coordinates - number of coordinates:" << d);
+			  dim_check = false;
+			}
+      base_node tmpn;
+      if (d == dim_prob) {
+				if (dim_prob == 3) {
+				  base_node dim_tmpn(tmpv[1], tmpv[2]);
+					tmpn = dim_tmpn;
+			  } else if (dim_prob == 4) {
+				  base_node dim_tmpn(tmpv[1], tmpv[2], tmpv[3]);
+					tmpn = dim_tmpn;
+				}
+			}else
+				GMM_ASSERT1(0, "Points do not have costant number of coordinates - first point n. of coordinates:" << dim_prob << " - current point n. of coordinates" << d);
+
+
+			//base_node tmpn(tmpv[1], tmpv[2], tmpv[3]);
+			lpoints.push_back(tmpn);
+			if (tmp.compare("END_ARC") == 0){
+				thend = true;
+				Nn[Nb-1]--;
+			}
+		 }
 
 		} /* end of inner while */
 
