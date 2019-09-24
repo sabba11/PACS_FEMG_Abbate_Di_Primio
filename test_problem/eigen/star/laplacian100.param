@@ -10,7 +10,7 @@ OUTPUT = 'star/';
 %  MESH
 %===================================
 % Path to import the 1d list of points
-MESH_FILEG = '../../data_builder/data/simple_star_100.pts'
+MESH_FILEG = '../../data_builder/data/star_100.pts'
 %===================================
 %  GETFEM DESCRIPTORS
 %===================================

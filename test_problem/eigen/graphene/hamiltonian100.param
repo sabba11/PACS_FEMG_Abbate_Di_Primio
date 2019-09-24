@@ -10,7 +10,7 @@ OUTPUT = 'graphene/';
 %  MESH
 %===================================
 % Path to import the 1d list of points
-MESH_FILEG = '../../data_builder/data/simple_graphene_1_100.pts'
+MESH_FILEG = '../../data_builder/data/graphene_100.pts'
 %===================================
 %  GETFEM DESCRIPTORS
 %===================================
