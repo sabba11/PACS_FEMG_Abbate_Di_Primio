@@ -4,8 +4,8 @@ clear all
 addpath('./matlab_functions')
 out_filename = '../data/scale_free.txt';
 
-
-ndim = 3;
+ndim = 2;
+% ndim = 3;
 
 %Circle radius
 L = 4;
@@ -36,7 +36,11 @@ for i = 1:(N-2)/2
     scanning_index = scanning_index + 1;
 end
 
-points = FEMG_augment_dim(points);
+%Augmenting dimension
+if ndim == 3
+    points = FEMG_augment_dim(points);
+end
+
 [Matrix_adj] = CONTEST_pref(N, 2);
 BC = zeros(N,5);
 Matrix_adj = full(Matrix_adj);
@@ -45,7 +49,10 @@ Matrix_adj = full(Matrix_adj);
 
 [Edges,Finaltext] = FEMG_build_graphtext(ndim,N,points,Matrix_adj,BC);
 
-%FEMG_plot2d_graph(Edges,points)
-FEMG_plot3d_graph(Edges,points)
+if ndim == 2
+    FEMG_plot2d_graph(Edges,points)
+else
+    FEMG_plot3d_graph(Edges,points)
+end
 
 dlmwrite(out_filename, Finaltext, 'delimiter', '');

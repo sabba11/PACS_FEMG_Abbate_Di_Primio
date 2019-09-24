@@ -20,7 +20,8 @@ addpath('./matlab_functions')
 % Number of vertexes
 n = 11;
 % Setting dimension of the problem
-ndim = 3;
+ndim = 2;
+% ndim = 3;
 % Output file name
 out_filename = '../data/graphene_noline.txt';
 
@@ -40,8 +41,11 @@ for i = 1:6
     end
 end
 
+%Augmenting dimension
+if ndim == 3
+    points = FEMG_augment_dim(points);
+end
 
-points = FEMG_augment_dim(points);
 points(:,2) = points(:,2) - ones(length(points(:,2)),1)*points(5,2) ;
 
 % CONNECTION OF THE VERTEXES
@@ -76,8 +80,11 @@ BC = zeros(n,5);
 % Writing output and plotting the graph
 [Edges,Finaltext] = FEMG_build_graphtext(ndim,n,points,Matrix_adj,BC);
 
-%FEMG_plot2d_graph(Edges,points)
-FEMG_plot3d_graph(Edges,points)
+if ndim == 2
+    FEMG_plot2d_graph(Edges,points)
+else
+    FEMG_plot3d_graph(Edges,points)
+end
 
 
 

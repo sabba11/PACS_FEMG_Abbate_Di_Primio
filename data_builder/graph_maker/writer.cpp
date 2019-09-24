@@ -20,7 +20,7 @@ int main( int argc, char* argv[] ) {
     std::cerr << "Error: invalid input arguments." << std::endl;
   //Discretization parameter N
   const int N = std::stoi(argv[1]);
-  const unsigned int dim = 3;
+  const unsigned int dim = 2;
   const unsigned int num_BC = 1;
   //Type-aliases
   using Graph = boost::adjacency_list< boost::vecS, boost::vecS, boost::undirectedS, Vertex_base_property<dim,num_BC>, Edge_base_property<linear_geometry<dim>, dim>>;

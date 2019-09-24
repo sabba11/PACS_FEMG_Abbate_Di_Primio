@@ -22,7 +22,8 @@ addpath('./matlab_functions')
 % Number of points of the star
 n = 4;
 % Setting dimension of the problem
-ndim = 3;
+ndim = 2;
+% ndim = 3;
 % Output file name
 out_filename = '../data/star.txt';
 
@@ -43,7 +44,10 @@ for i = 2:ntot
    points(i,:) = [L/2+L/2*cos((i-2)*2*pi/n),L/2+L/2*sin((i-2)*2*pi/n)];
 end
 
-points = FEMG_augment_dim(points);
+%Augmenting dimension
+if ndim == 3
+    points = FEMG_augment_dim(points);
+end
 points(:,2) = points(:,2) - ones(length(points(:,2)),1);
 points(:,1) = points(:,1) - ones(length(points(:,2)),1);
 
@@ -70,8 +74,11 @@ BC(2,:) = ['DIR ', '1'];
 % Writing output and plotting the graph
 [Edges,Finaltext] = FEMG_build_graphtext(ndim,ntot,points,Matrix_adj,BC);
 
-%FEMG_plot2d_graph(Edges,points)
-FEMG_plot3d_graph(Edges,points)
+if ndim == 2
+    FEMG_plot2d_graph(Edges,points)
+else
+    FEMG_plot3d_graph(Edges,points)
+end
 
 
 dlmwrite(out_filename, Finaltext, 'delimiter', '');
