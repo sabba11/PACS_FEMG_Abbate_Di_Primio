@@ -4,9 +4,7 @@
 CXX = g++
 CXXFLAGS += -std=c++11
 
-INCLUDES = -I$(FEMG_DIR)/include -I. -I$(mkBGLInc) -I$(GETFEM_INC_DIR)
-
-CPPFLAGS += $(INCLUDES) -D FEMG_VERBOSE_ -D GMM_USES_LAPACK
+CPPFLAGS = $(INCLUDES) -D FEMG_VERBOSE_ -D GMM_USES_LAPACK
 
 .PHONY = all clean distclean
 

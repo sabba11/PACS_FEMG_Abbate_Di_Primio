@@ -16,7 +16,7 @@ include $(MAKEFILEH_DIR)/Makefile.inc
 
 #=========================================================================
 
-CPPFLAGS += $(INCLUDES) -D FEMG_VERBOSE_ -D GMM_USES_LAPACK
+CPPFLAGS = $(INCLUDES) -D FEMG_VERBOSE_ -D GMM_USES_LAPACK
 
 .PHONY: help all clean distclean doc library static dynamic install alltest
 
