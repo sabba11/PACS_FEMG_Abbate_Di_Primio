@@ -4,7 +4,7 @@
 CXX = g++
 CXXFLAGS += -std=c++11
 
-override CPPFLAGS := $(CPPFLAGS) $(INCLUDES) -D GMM_USES_LAPACK
+override CPPFLAGS := $(CPPFLAGS) $(INCLUDES) -DGMM_USES_LAPACK
 
 .PHONY = all clean distclean
 
@@ -43,10 +43,14 @@ graph_maker:
 	$(MAKE) -C data_builder/graph_maker all
 	@echo "--- COMPLETED ---"
 
+resultclean:
+	rm -r -f $(RESULTS)
+
 clean:
 	$(MAKE) -C test_problem/eigen clean
 	$(MAKE) -C data_builder/graph_maker clean
 
+# distclean should call resultclean, it does not for the moment, for testing reasons
 distclean:
 	$(MAKE) -C test_problem/eigen distclean
 	$(MAKE) -C $(FEMG_DIR) distclean

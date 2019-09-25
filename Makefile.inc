@@ -22,9 +22,13 @@ ALL_INC_DIR= $(EIGEN_INC_DIR) $(GETFEM_INC_DIR) $(BGL_INC_DIR)
 includes := $(foreach inc,$(ALL_INC_DIR),-I$(inc))
 INCLUDES += -I. -I./include $(includes)
 
-
 # Linking libraries
 LDLIBS += -L$(mkBGLInc)/../lib -lboost_filesystem -L$(mkBGLInc)/../lib -lboost_system -L$(FEMG_DIR)/lib -lFEMG -lqhull -llapack -llapacke -lblas -lgetfem -lblas -llapacke -llapack -lqhull -L$(FEMG_DIR)/lib -lFEMG  -L$(mkBGLInc)/../lib -lboost_system -L$(mkBGLInc)/../lib -lboost_filesystem -L$(mkBGLInc)/../lib
+
+# Results libraries
+EIGEN_TEST = $(wildcard $(PROJECT_DIR)/test_problem/eigen/*/.)
+ALL_TEST = $(EIGEN_TEST)
+RESULTS := $(foreach dir,$(ALL_TEST),$(dir)/export)
 
 
 

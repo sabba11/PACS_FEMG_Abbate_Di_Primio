@@ -77,9 +77,13 @@ install:
 
 
 clean:
+	@echo ""
+	@echo "--- Removing objects used to build the library ---"	
 	-rm -rv -f $(BUILD_DIR)
 
 
 distclean: clean
+	@echo ""
+	@echo "--- Removing library ---"
 	-rm -rv -f $(LIB_DIR) $(DATA_DIR)
 
