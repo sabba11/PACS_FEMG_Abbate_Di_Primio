@@ -205,6 +205,7 @@ namespace getfem {
 				time_inverse = clock();
 				gmm::lu_inverse(inverse_mass);
 				time_inverse = clock() - time_inverse;
+				log_data.push_back(std::make_pair("Time for matrix inversion (seconds): ", static_cast<float>(time_inverse)/CLOCKS_PER_SEC));
 				gmm::mult(inverse_mass, aux_H, A);
 				scalar_type tol = descr.TOL;
 				std::cout << "[eigen_problem] Starting QR routine..." << std::endl;
@@ -214,9 +215,10 @@ namespace getfem {
 				gmm::implicit_qr_algorithm(dense_A, eigvals, tol);
 				gmm::geev_interface_right(dense_A, eigvals, eigvects);
 				time_qr = clock() - time_qr;
+				log_data.push_back(std::make_pair("Time for QR convergence (seconds): ", static_cast<float>(time_qr)/CLOCKS_PER_SEC));
 				#ifdef FEMG_VERBOSE_
-				std::cout << "[eigen_problem] Time to invert matrix: " << static_cast<float>(time_inverse)/CLOCKS_PER_SEC << "seconds." << std::endl;
-				std::cout << "[eigen_problem] Time for QR convergence: " << static_cast<float>(time_qr/CLOCKS_PER_SEC) << "seconds." << std::endl;
+				std::cout << "[eigen_problem] Time to invert matrix: " << log_data[0].second << " seconds." << std::endl;
+				std::cout << "[eigen_problem] Time for QR convergence: " << log_data[1].second << " seconds." << std::endl;
 				#endif
 				for (unsigned i = 0; i < n_totalvert; i++) {
 					vector_type aux_v;
@@ -281,12 +283,18 @@ namespace getfem {
 		#ifdef FEMG_VERBOSE_
 		std::cout << "[eigen_problem] Exporting eigenvalues and eigenvector files..." << std::endl;
 		#endif
-		std::ostringstream eigval_name_builder;
+		std::ostringstream eigval_name_builder, log_name_builder;
 		std::string s(n_digits, '0');
 		eigval_name_builder << dir_name_builder.str() << "/" << s << "-eigenvalues.txt";
+		log_name_builder << dir_name_builder.str() << "/" << "export.log";
+		std::fstream log(log_name_builder.str(), std::ios::out);
+		if (!log) {
+			std::cerr << "[eigen_problem] Unable to open log file " << log_name_builder.str() << std::endl;
+		}
 		std::fstream eig(eigval_name_builder.str(), std::ios::out);
 		if (!eig) {
-			std::cerr << "[eigen_problem] Unable to open file " << eigval_name_builder.str() << " to export eigenvalues" << std::endl;
+			log << "Exporting failed.\n";
+			log << "Unable to open file " << eigval_name_builder.str() << " to export eigenvalues.\n";
 			return;
 		}
 		for (auto it = eigpairs.begin(); it != eigpairs.end(); it++) {
@@ -297,7 +305,8 @@ namespace getfem {
 	 		file_name_builder << dir_name_builder.str() << "/" << zeros << i << "-eigenvector-" << eigen << ".U";
 	 		std::fstream f(file_name_builder.str(), std::ios::out);
 			if (!f) {
-				std::cerr << "[eigen_problem] Unable to open file " << file_name_builder.str() << " to export eigenvector " << i << std::endl;
+				log << "Exporting failed.\n";
+				log << "Unable to open file " << file_name_builder.str() << " to export eigenvector " << i << "\n";
 				return;
 			}
 	 		for (unsigned j = 0; j < gmm::vect_size(it->second); ++j)
@@ -307,6 +316,11 @@ namespace getfem {
 			f.close();
 		}
 		eig.close();
+		// Exports log file if files are created successfully.
+		log << "Exporting successful.\n";
+		for (auto it = log_data.begin(); it != log_data.end(); it++) {
+			log << it->first << it->second << "\n";
+		}
 		// Exports mesh and mesh_fem objects to text files.
 		meshg.write_to_file(dir_name_builder.str() + "/mesh.mh" );
 	 	// when the 2nd arg is true, the mesh is saved with the |mf|
