@@ -14,6 +14,7 @@
 #include <complex>
 #include <iostream>
 #include <fstream>
+#include <time.h>
 #include <boost/filesystem.hpp>
 
 // Project headers
@@ -190,6 +191,8 @@ namespace getfem {
 			std::cout << "[eigen_problem] Solving the problem via QR algorithm..." << std::endl;
 			#endif
 			try {
+				clock_t time_inverse, time_qr;
+				float tinv, tqr;
 				dense_matrix_type eigvects(n_totalvert, n_totalvert);
 				// Initial guess for all eigenvalues is 1.
 				complex_vector_type eigvals(n_totalvert, 1);
@@ -199,17 +202,25 @@ namespace getfem {
 				gmm::copy(A, aux_H);
 				scalar_type cond_number = gmm::condition_number(M);
 				std::cout << "[eigen_problem] The mass matrix M has condition number " << cond_number << std::endl;
+				time_inverse = clock();
 				gmm::lu_inverse(inverse_mass);
+				time_inverse = clock() - time_inverse;
 				gmm::mult(inverse_mass, aux_H, A);
 				scalar_type tol = descr.TOL;
 				std::cout << "[eigen_problem] Starting QR routine..." << std::endl;
 				dense_matrix_type dense_A(n_totalvert, n_totalvert);
 				gmm::copy(A, dense_A);
+				time_qr = clock();
 				gmm::implicit_qr_algorithm(dense_A, eigvals, tol);
 				gmm::geev_interface_right(dense_A, eigvals, eigvects);
-				for (int i = 0; i < n_totalvert; i++) {
+				time_qr = clock() - time_qr;
+				#ifdef FEMG_VERBOSE_
+				std::cout << "[eigen_problem] Time to invert matrix: " << static_cast<float>(time_inverse)/CLOCKS_PER_SEC << "seconds." << std::endl;
+				std::cout << "[eigen_problem] Time for QR convergence: " << static_cast<float>(time_qr/CLOCKS_PER_SEC) << "seconds." << std::endl;
+				#endif
+				for (unsigned i = 0; i < n_totalvert; i++) {
 					vector_type aux_v;
-					for (int j = 0; j < n_totalvert; j++)
+					for (unsigned j = 0; j < n_totalvert; j++)
 						aux_v.push_back(eigvects(j, i));
 					if (abs(eigvals[i].imag()) < 1e-10) {
 						auto eigpair = std::make_pair(eigvals[i].real(), aux_v);
