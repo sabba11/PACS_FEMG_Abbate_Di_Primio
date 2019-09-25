@@ -29,6 +29,7 @@ namespace getfem {
 		std::cout << "--------------------------------------------------" << std::endl;
 		std::cout << " OPERATOR                  : " << OPERATOR    << std::endl;
 		std::cout << " COMPUTATIONAL METHOD      : " << COMP_METHOD << std::endl;
+		std::cout << " TOLERANCE                 : " << TOL << std::endl;
 		return;
 	}
 
