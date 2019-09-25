@@ -18,8 +18,6 @@ TO DO:
 
 - migliorare post-processing (confronti tra simulazioni)
 
-- implementare in modo che il codice scelga da solo tra 2d-3d
-
 - modificare write.pts per scrivere nuovi metodi per la mesh (step h e non totale N)
 
 - implementare aggiunta potenziale ad operatore (ormai idea è modificarlo in input.param
