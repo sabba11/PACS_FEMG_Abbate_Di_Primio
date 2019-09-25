@@ -191,8 +191,7 @@ namespace getfem {
 			std::cout << "[eigen_problem] Solving the problem via QR algorithm..." << std::endl;
 			#endif
 			try {
-				clock_t time_inverse, time_qr;
-				float tinv, tqr;
+				clock_t time_inverse, time_eigval, time_eigvect;
 				dense_matrix_type eigvects(n_totalvert, n_totalvert);
 				// Initial guess for all eigenvalues is 1.
 				complex_vector_type eigvals(n_totalvert, 1);
@@ -211,14 +210,17 @@ namespace getfem {
 				std::cout << "[eigen_problem] Starting QR routine..." << std::endl;
 				dense_matrix_type dense_A(n_totalvert, n_totalvert);
 				gmm::copy(A, dense_A);
-				time_qr = clock();
+				time_eigval = clock();
 				gmm::implicit_qr_algorithm(dense_A, eigvals, tol);
+				time_eigval = clock() - time_eigval;
+				log_data.push_back(std::make_pair("Time to compute eigenvalues (seconds): ", static_cast<float>(time_eigval)/CLOCKS_PER_SEC));
+				time_eigvect = clock();
 				gmm::geev_interface_right(dense_A, eigvals, eigvects);
-				time_qr = clock() - time_qr;
-				log_data.push_back(std::make_pair("Time for QR convergence (seconds): ", static_cast<float>(time_qr)/CLOCKS_PER_SEC));
+				time_eigvect = clock() - time_eigvect;
+				log_data.push_back(std::make_pair("Time to compute eigenvectors (seconds): ", static_cast<float>(time_eigvect)/CLOCKS_PER_SEC));
 				#ifdef FEMG_VERBOSE_
-				std::cout << "[eigen_problem] Time to invert matrix: " << log_data[0].second << " seconds." << std::endl;
-				std::cout << "[eigen_problem] Time for QR convergence: " << log_data[1].second << " seconds." << std::endl;
+				for (unsigned i = 0; i < log_data.size(); i++)
+					std::cout << "[eigen_problem] " << log_data[i].first << log_data[i].second << std::endl;
 				#endif
 				for (unsigned i = 0; i < n_totalvert; i++) {
 					vector_type aux_v;
