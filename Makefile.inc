@@ -1,8 +1,8 @@
 # Directory where the project resides.
-PROJECT_DIR = /home/sguillo/Desktop/PACS_new
+PROJECT_DIR = /home/sguillo/Documents/PACS_FEMG_Abbate_Di_Primio
 
 # Installation path  
-INSTALL_PATH = /home/sguillo/Desktop/PACS_new/install
+INSTALL_PATH = $(PROJECT_DIR)/install
 
 # The place where we do find the files that let us install the library
 FEMG_DIR = $(PROJECT_DIR)/FEMG
@@ -22,8 +22,6 @@ ALL_INC_DIR= $(EIGEN_INC_DIR) $(GETFEM_INC_DIR) $(BGL_INC_DIR)
 includes := $(foreach inc,$(ALL_INC_DIR),-I$(inc))
 INCLUDES += -I. -I./include $(includes)
 
-# Including headers from the FEMG library
-CPPFLAGS += -I$(FEMG_DIR)/include $(INCLUDES)
 
 # Linking libraries
 LDLIBS += -L$(mkBGLInc)/../lib -lboost_filesystem -L$(mkBGLInc)/../lib -lboost_system -L$(FEMG_DIR)/lib -lFEMG -lqhull -llapack -llapacke -lblas -lgetfem -lblas -llapacke -llapack -lqhull -L$(FEMG_DIR)/lib -lFEMG  -L$(mkBGLInc)/../lib -lboost_system -L$(mkBGLInc)/../lib -lboost_filesystem -L$(mkBGLInc)/../lib

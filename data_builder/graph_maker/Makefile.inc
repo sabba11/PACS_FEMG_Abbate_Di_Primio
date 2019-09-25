@@ -21,9 +21,6 @@ ALL_INC_DIR= $(EIGEN_INC_DIR) $(BGL_INC_DIR) $(GETFEM_INC_DIR)
 includes := $(foreach inc,$(ALL_INC_DIR),-I$(inc))
 INCLUDES += -I. -I./include $(includes)
 
-# Including headers from the BGLgeom library
-CPPFLAGS += -I$(BGLGEOM_DIR)/include $(INCLUDES)
-
 # Linking libraries
 LDLIBS += -lqhull -llapack -llapacke -lblas -lgetfem -lblas -llapacke -llapack -lqhull -L$(BGLGEOM_DIR)/lib -lBGLgeom
 

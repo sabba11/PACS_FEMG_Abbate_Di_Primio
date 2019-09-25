@@ -4,7 +4,7 @@
 CXX = g++
 CXXFLAGS += -std=c++11
 
-CPPFLAGS = $(INCLUDES) -D FEMG_VERBOSE_ -D GMM_USES_LAPACK
+override CPPFLAGS := $(CPPFLAGS) $(INCLUDES) -D GMM_USES_LAPACK
 
 .PHONY = all clean distclean
 

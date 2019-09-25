@@ -6,7 +6,7 @@ CXXFLAGS += -std=c++11
 
 INCLUDES += -I$(BGLGEOM_DIR)/include
 
-CPPFLAGS = $(INCLUDES)
+override CPPFLAGS := $(CPPFLAGS) $(INCLUDES)
 
 .PHONY = all clean distclean
 
