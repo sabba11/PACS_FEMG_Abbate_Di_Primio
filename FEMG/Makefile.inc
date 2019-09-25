@@ -17,11 +17,6 @@ INCLUDE_DIR = include
 BUILD_DIR_STATIC  = $(BUILD_DIR)/static
 BUILD_DIR_DYNAMIC = $(BUILD_DIR)/dynamic
 
-# Collect all includes
-ALL_INC_DIR= $(EIGEN_INC_DIR) $(GETFEM_INC_DIR) $(BGL_INC_DIR)
-includes := $(foreach inc,$(ALL_INC_DIR),-I$(inc))
-INCLUDES += -I. -I./include $(includes)
-
 # Library variables
 LIBNAME = FEMG
 DYNAMIC_LIBFILE = lib$(LIBNAME).so
