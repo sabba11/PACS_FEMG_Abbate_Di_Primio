@@ -39,7 +39,10 @@ private:
 	sparse_matrix_type L;
 
 	// Map to save eigenpairs
-	std::multimap< scalar_type, vector_type > eigpairs;
+	std::multimap<scalar_type, vector_type> eigpairs;
+
+	// Vector structure to save log data
+	std::vector<std::pair<std::string, scalar_type>>  log_data;
 
 	//Auxiliary methods for init procedure
 	void import_data(void);
