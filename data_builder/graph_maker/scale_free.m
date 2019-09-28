@@ -19,8 +19,7 @@ N = 20;
 
 points = zeros(N,2);
 
-dx = L*2*2/N;
-
+theta = pi/(N/2);
 scanning_x = x-L;
 
 points(1,:) = [scanning_x, y];
@@ -29,7 +28,7 @@ points(N,:) = [x+L, y];
 scanning_index = 2;
 
 for i = 1:(N-2)/2
-    scanning_x = scanning_x + dx;
+    scanning_x = x-L*cos(theta*i);
     points(scanning_index,:) = [scanning_x, y + sqrt(L^2 - (scanning_x-x)^2)];
     scanning_index = scanning_index + 1;
     points(scanning_index,:) = [scanning_x, y - sqrt(L^2 - (scanning_x-x)^2)];
