@@ -55,6 +55,8 @@ int main( int argc, char* argv[] ) {
       e = new_linear_edge(s, d, G);
       // Calculation for correct mesh step for each edge
       double l = G[e].geometry.length();
+      if (l<h)
+         std::cerr << "Error: mesh step longer than the edge." << std::endl;
       int N = l/h;
       if ((l-N*h)>0.5)
          N++;
@@ -97,6 +99,8 @@ int main( int argc, char* argv[] ) {
       e = new_linear_edge(s, d, G);
       // Calculation for correct mesh step for each edge
       double l = G[e].geometry.length();
+      if (l<h)
+         std::cerr << "Error: mesh step longer than the edge." << std::endl;
       int N = l/h;
       if ((l-N*h)>0.5)
          N++;
