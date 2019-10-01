@@ -12,15 +12,23 @@ override CPPFLAGS := $(CPPFLAGS) $(INCLUDES)
 
 .DEFAULT_GOAL = all
 
-all: writer
+all: uniform_writer equisplit_writer
 
-writer: writer.o
+equisplit_writer: equisplit_writer.o
 	@echo " "
 	@echo "--- Linking ---" 
-	$(CXX) -o writer writer.o $(LDLIBS)
+	$(CXX) -o equisplit_writer equisplit_writer.o $(LDLIBS)
 
-writer.o: writer.cpp reader_femg.hpp 
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c writer.cpp
+equisplit_writer.o: equisplit_writer.cpp reader_femg.hpp 
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c equisplit_writer.cpp
+
+uniform_writer: uniform_writer.o
+	@echo " "
+	@echo "--- Linking ---" 
+	$(CXX) -o uniform_writer uniform_writer.o $(LDLIBS)
+
+uniform_writer.o: uniform_writer.cpp reader_femg.hpp 
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c uniform_writer.cpp
 
 clean:
 	@echo " "
@@ -30,8 +38,8 @@ clean:
 distclean: clean
 	@echo " "
 	@echo "--- Cleaning graph makers executable ---"
-	rm -f writer
-
+	rm -f uniform_writer
+	rm -f equisplit_writer
 
 
 
