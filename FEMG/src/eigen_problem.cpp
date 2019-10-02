@@ -17,8 +17,15 @@
 #include <time.h>
 #include <boost/filesystem.hpp>
 
+
 // Project headers
 #include "eigen_problem.hpp"
+ extern "C" {void dggev_( char* jobvl, char* jobvr, long unsigned int* na, double* a, long unsigned int* nb, double* b,
+                         long unsigned int* lda, double* wr, double* wi, double* wd, double* vl, long unsigned int* ldvl,
+                         double* vr, long unsigned int* ldvr, double* work, long int* lwork, long int* info );}
+// extern void dggev_( char* jobvl, char* jobvr, long unsigned int* na, double* a, long unsigned int* nb, double* b,
+//                 long unsigned int* lda, double* wr, double* wi, double* wd, double* vl, long unsigned int* ldvl,
+//                 double* vr, long unsigned int* ldvr, double* work, long int* lwork, long int* info );
 
 namespace getfem {
 
@@ -191,7 +198,8 @@ namespace getfem {
 			std::cout << "[eigen_problem] Solving the problem via QR algorithm..." << std::endl;
 			#endif
 			try {
-				clock_t time_inverse, time_eig, time_mult;
+				clock_t time_inverse, time_eig, time_tot, time_mult;
+				time_tot = clock();
 				dense_matrix_type eigvects(n_totalvert, n_totalvert);
 				// Initial guess for all eigenvalues is 1.
 				complex_vector_type eigvals(n_totalvert, 1);
@@ -205,7 +213,10 @@ namespace getfem {
 				gmm::lu_inverse(inverse_mass);
 				time_inverse = clock() - time_inverse;
 				log_data.push_back(std::make_pair("Time for matrix inversion (seconds): ", static_cast<float>(time_inverse)/CLOCKS_PER_SEC));
+        time_mult = clock();
 				gmm::mult(inverse_mass, aux_H, A);
+				time_mult = clock() - time_mult;
+				log_data.push_back(std::make_pair("Time for matrix multiplication (seconds): ", static_cast<float>(time_mult)/CLOCKS_PER_SEC));
 				std::cout << static_cast<float>(time_inverse)/CLOCKS_PER_SEC << std::endl;
 				scalar_type tol = descr.TOL;
 				std::cout << "[eigen_problem] Starting QR routine..." << std::endl;
@@ -214,7 +225,7 @@ namespace getfem {
 				time_eig = clock();
 				gmm::geev_interface_right(dense_A, eigvals, eigvects);
 				time_eig = clock() - time_eig;
-				log_data.push_back(std::make_pair("Time to compute eigencouples (seconds): ", static_cast<float>(time_eig)/CLOCKS_PER_SEC));
+				log_data.push_back(std::make_pair("Time to QR convergence (seconds): ", static_cast<float>(time_eig)/CLOCKS_PER_SEC));
 				#ifdef FEMG_VERBOSE_
 				for (unsigned i = 0; i < log_data.size(); i++)
 					std::cout << "[eigen_problem] " << log_data[i].first << log_data[i].second << std::endl;
@@ -230,12 +241,76 @@ namespace getfem {
 					else
 						std::cout << "[eigen_problem] Warning: complex eigenvalue ignored. Value: " << eigvals[i].real() << " + " << eigvals[i].imag() << "i" << std::endl;
 				}
+				time_tot = clock() - time_tot;
+				log_data.push_back(std::make_pair("Time to compute eigencouples (seconds): ", static_cast<float>(time_tot)/CLOCKS_PER_SEC));
 			}
 			GMM_STANDARD_CATCH_ERROR;
 		}
 
 		else if (descr.COMP_METHOD == "pencil_thm") {
 			// to be defined
+		}
+
+		else if (descr.COMP_METHOD == "QZ") {
+			#ifdef FEMG_VERBOSE_
+			std::cout << "[eigen_problem] Solving the problem via QZ algorithm..." << std::endl;
+			#endif
+			try {
+				clock_t time_eig,time_tot;
+				time_tot = clock();
+				dense_matrix_type eigvects(n_totalvert, n_totalvert);
+				// Initial guess for all eigenvalues is 1.
+				complex_vector_type eigvals(n_totalvert, 1);
+				scalar_type tol = descr.TOL;
+				std::cout << "[eigen_problem] Starting QZ routine..." << std::endl;
+        long info(0), lwork(-1);
+				double work1;
+        gmm::dense_matrix<double> A_blas(n_totalvert, n_totalvert);
+				gmm::copy(A, A_blas);
+				gmm::dense_matrix<double> M_blas(n_totalvert, n_totalvert);
+				gmm::copy(M, M_blas);
+        std::vector<double> eigvr(n_totalvert), eigvi(n_totalvert), eigvden(n_totalvert);
+				time_eig = clock();
+				char boolleft = 'V';
+				char boolright = 'N';
+        dggev_(&boolleft, &boolright, &n_totalvert, &A_blas(0,0), &n_totalvert, &M_blas(0,0),
+				      &n_totalvert, &eigvr[0], &eigvi[0], &eigvden[0],
+							&eigvects(0,0), &n_totalvert, &eigvects(0,0), &n_totalvert, &work1, &lwork, &info);
+        lwork = long(gmm::real(work1));
+        std::vector<double> work(lwork);
+				dggev_(&boolleft, &boolright, &n_totalvert, &A_blas(0,0), &n_totalvert, &M_blas(0,0),
+				      &n_totalvert, &eigvr[0], &eigvi[0], &eigvden[0],
+							&eigvects(0,0), &n_totalvert, &eigvects(0,0), &n_totalvert, &work[0], &lwork, &info);
+				GMM_ASSERT1(!info, "QZ algorithm failed");
+
+				for (unsigned i=0; i<n_totalvert; i++){
+          eigvi[i] = eigvi[i]/eigvden[i];
+          eigvr[i] = eigvr[i]/eigvden[i];
+				}
+        gmm::copy(eigvr, gmm::real_part(const_cast<complex_vector_type &>(eigvals)));
+        gmm::copy(eigvi, gmm::imag_part(const_cast<complex_vector_type &>(eigvals)));
+				time_eig = clock() - time_eig;
+				log_data.push_back(std::make_pair("Time to QZ convergence (seconds): ", static_cast<float>(time_eig)/CLOCKS_PER_SEC));
+
+				#ifdef FEMG_VERBOSE_
+				for (unsigned i = 0; i < log_data.size(); i++)
+					std::cout << "[eigen_problem] " << log_data[i].first << log_data[i].second << std::endl;
+				#endif
+				for (unsigned i = 0; i < n_totalvert; i++) {
+					vector_type aux_v;
+					for (unsigned j = 0; j < n_totalvert; j++)
+						aux_v.push_back(eigvects(j, i));
+					if (abs(eigvals[i].imag()) < 1e-10) {
+						auto eigpair = std::make_pair(eigvals[i].real(), aux_v);
+						eigpairs.insert(eigpair);
+					}
+					else
+						std::cout << "[eigen_problem] Warning: complex eigenvalue ignored. Value: " << eigvals[i].real() << " + " << eigvals[i].imag() << "i" << std::endl;
+				}
+				time_tot = clock() - time_tot;
+				log_data.push_back(std::make_pair("Time to compute eigencouples (seconds): ", static_cast<float>(time_tot)/CLOCKS_PER_SEC));
+			}
+			GMM_STANDARD_CATCH_ERROR;
 		}
 
 		else {
