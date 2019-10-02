@@ -33,7 +33,10 @@ namespace femg {
     virtual Edge_prop get_edge_data() override;
     virtual Vertex_prop get_source_data() override;
     virtual Vertex_prop get_target_data() override;
-    virtual Topological_data get_topological_data() override {}
+    virtual Topological_data get_topological_data() override {
+      Topological_data t;
+      return t;
+    }
   private:
     std::vector<boundary_condition> BCs = std::vector<boundary_condition>(2*num_BC);
     std::vector<point<dim>> extrema = std::vector<point<dim>>(2);
@@ -42,7 +45,7 @@ namespace femg {
   template <unsigned int dim, unsigned int num_BC, typename Vertex_prop, typename Edge_prop, typename Topological_data>
   void reader_femg<dim, num_BC, Vertex_prop, Edge_prop, Topological_data>::get_data() {
     this->in_file >> extrema[0] >> extrema[1];
-    for (int j = 0; j < 2*num_BC; j++) {
+    for (unsigned j = 0; j < 2*num_BC; j++) {
       this->in_file >> BCs[j];
     } //reads from txt
     return;
@@ -60,7 +63,7 @@ namespace femg {
   template <unsigned int dim, unsigned int num_BC, typename Vertex_prop, typename Edge_prop, typename Topological_data>
   Vertex_prop reader_femg<dim, num_BC, Vertex_prop, Edge_prop, Topological_data>::get_source_data() {
     std::array<BGLgeom::boundary_condition, num_BC> BC;
-    for (int j = 0; j < num_BC; j++) {
+    for (unsigned j = 0; j < num_BC; j++) {
       BC[j] = BCs[j];
     } //initialize bc
     Vertex_prop src(extrema[0], BC); //creates vertex
@@ -71,7 +74,7 @@ namespace femg {
   template <unsigned int dim, unsigned int num_BC, typename Vertex_prop, typename Edge_prop, typename Topological_data>
   Vertex_prop reader_femg<dim, num_BC, Vertex_prop, Edge_prop, Topological_data>::get_target_data() {
     std::array<BGLgeom::boundary_condition, num_BC> BC;
-    for (int j = 0; j < num_BC; j++) {
+    for (unsigned j = 0; j < num_BC; j++) {
       BC[j] = BCs[num_BC + j];
     } //initialize bc
     Vertex_prop tgt(extrema[1], BC);
