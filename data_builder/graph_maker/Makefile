@@ -12,7 +12,7 @@ override CPPFLAGS := $(CPPFLAGS) $(INCLUDES)
 
 .DEFAULT_GOAL = all
 
-all: uniform_writer equisplit_writer
+all: ptsbuilder_N ptsbuilder_h
 
 ptsbuilder_N: ptsbuilder_N.o
 	@echo " "
@@ -38,8 +38,8 @@ clean:
 distclean: clean
 	@echo " "
 	@echo "--- Cleaning graph makers executable ---"
-	rm -f uniform_writer
-	rm -f equisplit_writer
+	rm -f ptsbuilder_h
+	rm -f ptsbuilder_N
 
 
 
