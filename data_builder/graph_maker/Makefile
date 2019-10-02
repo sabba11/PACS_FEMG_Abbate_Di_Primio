@@ -14,21 +14,21 @@ override CPPFLAGS := $(CPPFLAGS) $(INCLUDES)
 
 all: uniform_writer equisplit_writer
 
-equisplit_writer: equisplit_writer.o
+ptsbuilder_N: ptsbuilder_N.o
 	@echo " "
 	@echo "--- Linking ---" 
-	$(CXX) -o equisplit_writer equisplit_writer.o $(LDLIBS)
+	$(CXX) -o ptsbuilder_N ptsbuilder_N.o $(LDLIBS)
 
-equisplit_writer.o: equisplit_writer.cpp reader_femg.hpp 
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c equisplit_writer.cpp
+ptsbuilder_N.o: ptsbuilder_N.cpp reader_femg.hpp 
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c ptsbuilder_N.cpp
 
-uniform_writer: uniform_writer.o
+ptsbuilder_h: ptsbuilder_h.o
 	@echo " "
 	@echo "--- Linking ---" 
-	$(CXX) -o uniform_writer uniform_writer.o $(LDLIBS)
+	$(CXX) -o ptsbuilder_h ptsbuilder_h.o $(LDLIBS)
 
-uniform_writer.o: uniform_writer.cpp reader_femg.hpp 
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c uniform_writer.cpp
+ptsbuilder_h.o: ptsbuilder_h.cpp reader_femg.hpp 
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c ptsbuilder_h.cpp
 
 clean:
 	@echo " "
