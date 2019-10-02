@@ -191,7 +191,7 @@ namespace getfem {
 			std::cout << "[eigen_problem] Solving the problem via QR algorithm..." << std::endl;
 			#endif
 			try {
-				clock_t time_inverse, time_eigval, time_eigvect;
+				clock_t time_inverse, time_eig, time_mult;
 				dense_matrix_type eigvects(n_totalvert, n_totalvert);
 				// Initial guess for all eigenvalues is 1.
 				complex_vector_type eigvals(n_totalvert, 1);
@@ -206,18 +206,15 @@ namespace getfem {
 				time_inverse = clock() - time_inverse;
 				log_data.push_back(std::make_pair("Time for matrix inversion (seconds): ", static_cast<float>(time_inverse)/CLOCKS_PER_SEC));
 				gmm::mult(inverse_mass, aux_H, A);
+				std::cout << static_cast<float>(time_inverse)/CLOCKS_PER_SEC << std::endl;
 				scalar_type tol = descr.TOL;
 				std::cout << "[eigen_problem] Starting QR routine..." << std::endl;
 				dense_matrix_type dense_A(n_totalvert, n_totalvert);
 				gmm::copy(A, dense_A);
-				time_eigval = clock();
-				gmm::implicit_qr_algorithm(dense_A, eigvals, tol);
-				time_eigval = clock() - time_eigval;
-				log_data.push_back(std::make_pair("Time to compute eigenvalues (seconds): ", static_cast<float>(time_eigval)/CLOCKS_PER_SEC));
-				time_eigvect = clock();
+				time_eig = clock();
 				gmm::geev_interface_right(dense_A, eigvals, eigvects);
-				time_eigvect = clock() - time_eigvect;
-				log_data.push_back(std::make_pair("Time to compute eigenvectors (seconds): ", static_cast<float>(time_eigvect)/CLOCKS_PER_SEC));
+				time_eig = clock() - time_eig;
+				log_data.push_back(std::make_pair("Time to compute eigencouples (seconds): ", static_cast<float>(time_eig)/CLOCKS_PER_SEC));
 				#ifdef FEMG_VERBOSE_
 				for (unsigned i = 0; i < log_data.size(); i++)
 					std::cout << "[eigen_problem] " << log_data[i].first << log_data[i].second << std::endl;
@@ -287,7 +284,7 @@ namespace getfem {
 		#endif
 		std::ostringstream eigval_name_builder, log_name_builder;
 		std::string s(n_digits, '0');
-		eigval_name_builder << dir_name_builder.str() << "/" << s << "-eigenvalues.txt";
+		eigval_name_builder << dir_name_builder.str() << "/" << s << "-eigenvalues.U";
 		log_name_builder << dir_name_builder.str() << "/" << "export.log";
 		std::fstream log(log_name_builder.str(), std::ios::out);
 		if (!log) {
