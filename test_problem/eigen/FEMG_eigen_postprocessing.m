@@ -10,11 +10,12 @@
 clear all
 
 %% 1. Setup. Setting paths.
+% The line indicated with (!) possibly requires user input.
 
 close all
 clc
 
-path_to_files = 'star/export/Hamiltonian/401 point-mesh/QR'; % (!) path to eigenvectors/eigenvalues
+path_to_files = 'graphene/export/Laplacian/1299 point-mesh/QR'; % (!) path to eigenvectors/eigenvalues
 
 addpath('/usr/local/getfem_toolbox') % adds gf_* functions
 addpath(path_to_files) % adds path(s) to .U and mesh files
