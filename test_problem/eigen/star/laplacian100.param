@@ -41,7 +41,7 @@ OPERATOR = 'Laplacian'
 
 % Computational method
 % COMP_METHOD: 'QR', 'pencil_thm'
-COMP_METHOD = 'QR'
+COMP_METHOD = 'QZ'
 %=================================================================
 % 2. ELLIPTIC PROBLEM FLAGS
 %=================================================================

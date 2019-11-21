@@ -67,6 +67,12 @@ protected:
 
 	// GRAPH PARAMETERS
 
+	// Dimensions of the points
+  	unsigned dim_prob;
+
+	// Tangent vectors
+  	std::vector<vector_type> tg_vectors;
+
 	// Number of vertices in each branch
 	vector_size_type n_vertices;
 
@@ -99,6 +105,8 @@ protected:
 	// Array of unknowns for the discrete problem
 	vector_type U;
 
+  // Vector of radii
+  vector_type radii;
 
 	// AUX METHOD FOR INIT
 

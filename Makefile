@@ -1,8 +1,6 @@
 #Including Makefile.inc
 -include Makefile.inc
 #==============================================================================
-CXX = g++
-CXXFLAGS += -std=c++11
 
 override CPPFLAGS := $(CPPFLAGS) $(INCLUDES) -DGMM_USES_LAPACK
 
@@ -24,6 +22,10 @@ all: graph_maker library
 	@echo "--- Building eigen ---"
 	$(MAKE) -C test_problem/eigen all
 	@echo "--- COMPLETED ---"
+	@echo " "
+	@echo "--- Building elliptic ---"
+	$(MAKE) -C test_problem/elliptic all
+	@echo "--- COMPLETED ---"
 
 library:
 	@echo " "
@@ -37,6 +39,12 @@ eigen: library
 	$(MAKE) -C test_problem/eigen all
 	@echo "--- COMPLETED ---"
 
+elliptic: library
+	@echo " "
+	@echo "--- Building elliptic ---"
+	$(MAKE) -C test_problem/elliptic all
+	@echo "--- COMPLETED ---"
+
 graph_maker:
 	@echo " "
 	@echo "--- Building graph maker ---"
@@ -48,10 +56,12 @@ resultclean:
 
 clean:
 	$(MAKE) -C test_problem/eigen clean
+	$(MAKE) -C test_problem/elliptic clean
 	$(MAKE) -C data_builder/graph_maker clean
 
 # distclean should call resultclean, it does not for the moment, for testing reasons
 distclean:
 	$(MAKE) -C test_problem/eigen distclean
+	$(MAKE) -C test_problem/elliptic distclean
 	$(MAKE) -C $(FEMG_DIR) distclean
 	$(MAKE) -C data_builder/graph_maker distclean

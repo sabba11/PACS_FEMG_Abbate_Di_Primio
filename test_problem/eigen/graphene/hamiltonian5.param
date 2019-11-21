@@ -3,6 +3,11 @@
 %=======================================================================================
 % Flag to export results
 EXPORT = 1;
+% Importing radius for the calculation of the external sources
+% Boolean
+IMPORT_RADIUS = 0;
+% Path of the file containing the radii
+RFILE = 'empty';
 % Directory in which solutions will be exported, leave empty to choose
 % the directory containing main.
 OUTPUT = 'graphene/';

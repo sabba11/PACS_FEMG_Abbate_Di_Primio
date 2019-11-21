@@ -14,7 +14,7 @@ clear all
 close all
 clc
 
-path_to_files = 'star/export/Hamiltonian/401 point-mesh/QR'; % (!) path to eigenvectors/eigenvalues
+path_to_files = 'graphene/export/Laplacian/1299 point-mesh/QZ'; % (!) path to eigenvectors/eigenvalues
 
 addpath('/usr/local/getfem_toolbox') % adds gf_* functions
 addpath(path_to_files) % adds path(s) to .U and mesh files
@@ -44,7 +44,7 @@ fclose('all');
 
 %% 3. Computing eigenvector oscillations
 
-compute_oscillations(eigvects, mf, mesh) ;
+FEMG_compute_oscillations(eigvects, mf, mesh) ;
 
 %% 4. Eigenvalue plots
 
@@ -58,10 +58,11 @@ ylabel('Eigenvalue');
 
 n_plots = 10;
 for i = 1 : n_plots
-    figure()
     val = eigvals(i);
-    title(['Eigenvector associated to \lambda = ', num2str(val)]);
+    figure()
     gf_plot(mf, eigvects(:, i)', 'zplot', 'on', 'mesh', 'on', 'title', ['Eigenvector associated to \lambda = ', num2str(val)]);
+    title(['Eigenvector associated to \lambda = ', num2str(val)]);
+    colorbar
 end
 
 %% 6. Saving eigenvalue data for further comparison

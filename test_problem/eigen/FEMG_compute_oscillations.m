@@ -3,7 +3,7 @@
 % The function assumes eigenvectors are passed sorted by increasing
 % corresponding eigenvalues.
 
-function access_idxs = compute_oscillations(eigvects, mf, mesh) 
+function access_idxs = FEMG_compute_oscillations(eigvects, mf, mesh) 
     RIDs = gf_mesh_get(mesh, 'regions'); % get valid region indexes
     [DOFs, IDx] = gf_mesh_fem_get(mf, 'basic dof from cvid'); % get convex and dof enumeration
     

@@ -6,6 +6,7 @@
 #include "quantum_graph_problem.hpp"
 #include "eigen_descr_qg.hpp"
 #include <map>
+#include <functional>
 
 namespace getfem {
 class eigen_problem : public getfem::quantum_graph_problem {
@@ -15,6 +16,10 @@ public:
 
 	//Sets up problem parameters and data from input file.
 	virtual void init(int argc, char *argv[]) override;
+
+	//Builds coefficient vectors
+	void set_coefficients(const vector_function_type & f_vec, const vector_string_type & s_vec, const unsigned & n_mean_points);
+	void set_coefficients(const vector_function_type & f_vec, const vector_string_type & s_vec);
 
 	//Assembles matrices and vectors for the problem.
 	virtual void assembly(void) override;
@@ -38,6 +43,18 @@ private:
 	// Laplacian matrix of the extended graph
 	sparse_matrix_type L;
 
+	// Potential mass matrix
+	sparse_matrix_type V;
+
+	// Weight matrix for mass
+	vector_type right_weights;
+
+	// Weight matrix for Laplacian
+	vector_type left_weights;
+
+	// Potential matrix
+  	vector_type potential;
+
 	// Map to save eigenpairs
 	std::multimap<scalar_type, vector_type> eigpairs;
 
@@ -50,6 +67,9 @@ private:
 	void set_im_and_fem(void);
 	void build_param(void);
 	//void build_vertices_lists(void);
+
+	//Auxiliary methods to build coefficients
+	scalar_type compute_circular_mean(const unsigned & n_mean_points, const scalar_type & radius, const base_node & point, const vector_type & tg_vector, const std::function<scalar_type(base_node)> & f);
 
 	//Auxiliary methods for assembling procedure
 	void assembly_matA(void);

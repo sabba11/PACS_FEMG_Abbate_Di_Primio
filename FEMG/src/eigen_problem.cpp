@@ -16,10 +16,13 @@
 #include <fstream>
 #include <time.h>
 #include <boost/filesystem.hpp>
-
+#include <vector>
+#include <math.h>
 
 // Project headers
 #include "eigen_problem.hpp"
+#include "mesh_1d.hpp"
+
  extern "C" {void dggev_( char* jobvl, char* jobvr, long unsigned int* na, double* a, long unsigned int* nb, double* b,
                          long unsigned int* lda, double* wr, double* wi, double* wd, double* vl, long unsigned int* ldvl,
                          double* vr, long unsigned int* ldvr, double* work, long int* lwork, long int* info );}
@@ -45,9 +48,14 @@ namespace getfem {
 	     set_im_and_fem();
 
 	     //5. Build problem parameters
-	     //build_param();
+	     build_param();
 
-	     //6. Build the lists of the data of the vertices
+		   //6. Set default values for coefficients
+	 	   left_weights = vector_type(n_totalvert, 1.0);
+		   right_weights = vector_type(n_totalvert, 1.0);
+		   potential = vector_type(n_totalvert, 0.0);
+
+	     //7. Build the lists of the data of the vertices
 	     // build_vertices_lists();
 	}
 
@@ -76,7 +84,7 @@ namespace getfem {
 	    GMM_ASSERT1(ifs.good(),"Unable to read from file " << descr.MESH_FILEG);
       //ACHTUNG!: for the moment we don't give mesh step as an input parameter
 			// if we reimplement it back you should give it
-	    import_pts_file(ifs, meshg, BCg, n_origvert, n_vertices, descr.MESH_TYPEG);
+	    import_pts_file(ifs, meshg, BCg, n_origvert, dim_prob, tg_vectors, n_vertices, descr.MESH_TYPEG);
 
 	    n_branches = n_vertices.size();
   		n_totalvert = meshg.nb_points();
@@ -113,10 +121,14 @@ namespace getfem {
 	    #ifdef FEMG_VERBOSE_
 	    std::cout << "Building parameters for the problem..." << std::endl;
 	    #endif
-	    //param.build(INPUT, mf_coeffg, mf_coeffbranchg);
-	    #ifdef FEMG_VERBOSE_
-	    //std::cout << param;
-	    #endif
+      	if (descr.IMPORT_RADIUS) {
+        	cout << "Importing radius values from file " << descr.RFILE << " ..." << endl;
+        	std::ifstream ist(descr.RFILE);
+        	if (!ist) cerr << "Impossible to read from file " << descr.RFILE << endl;
+        	import_network_radius(radii, n_branches, ist, meshg, tg_vectors);
+        	ist.close();
+      	}
+      return;
 	}
 
 
@@ -126,6 +138,162 @@ namespace getfem {
 	// {
 	//     //to be defined
 	// }
+
+  //Builds coefficient vectors
+  void
+  eigen_problem::set_coefficients(const vector_function_type & f_vec, const vector_string_type & s_vec, const unsigned & n_mean_points)
+  {
+	GMM_ASSERT1((f_vec.size() == s_vec.size()) && (f_vec.size() <= 3) && (!f_vec.empty()), "Input data has invalid size.");
+	for (unsigned i = 0; i < f_vec.size(); i++) {
+		vector_size_type weight_den(n_totalvert, 0);
+	  vector_type weight(n_totalvert, 0.0);
+		std::set<unsigned> branch_idx;
+		unsigned k = 0; //aux counter
+		unsigned thresh = n_totalvert - n_origvert; //distinguish between idxs of real vertices and nodes
+		for (size_type b=0; b<n_branches; ++b) {
+			for (getfem::mr_visitor mrv(meshg.region(b)); !mrv.finished(); ++mrv) {
+				unsigned idx = mrv.cv(); //get convex index
+				vector_size_type pts = meshg.ind_points_of_convex(idx); //get point indexes of convex idx
+				for (size_type m = 0; m < pts.size(); m++)
+					branch_idx.insert(pts[m]); //collect in set to eliminate duplicates
+			}
+			for (auto it = branch_idx.begin(); it != branch_idx.end(); it++) {
+				weight_den[*it]++; //update the counter of ith point
+				weight[*it] += compute_circular_mean(n_mean_points, radii[k], meshg.points()[*it], tg_vectors[k], f_vec[i]); //update value
+				k++; //update the aux counter
+			}
+			branch_idx.clear(); //clear the set
+		}
+		// Check last region with real vertices
+		for (getfem::mr_visitor mrv(meshg.region(n_branches)); !mrv.finished(); ++mrv) {
+			unsigned idx = mrv.cv(); //get convex index
+			vector_size_type pts = meshg.ind_points_of_convex(idx); //get point indexes of convex idx
+			for (size_type m = 0; m < pts.size(); m++) {
+				if (pts[m] >= thresh) {
+					weight_den[pts[m]]++; //update counter
+					weight[pts[m]] += compute_circular_mean(n_mean_points, radii[k], meshg.points()[pts[m]], tg_vectors[k], f_vec[i]); //update value
+					k++; //update counter
+				}// if real point
+			}
+		}
+		for (size_type n = 0; n < n_totalvert; n++)
+			weight[n] = weight[n]/weight_den[n]; //all points will be counted at least once so weight_den cannot be 0
+		GMM_ASSERT1(s_vec[i] == "left" || s_vec[i] == "right" || s_vec[i] == "potential", "Invalid string input data.");
+		std::cout << "weights vector" << std::endl;
+		for (unsigned l = 0; l < weight.size(); l++) {
+			std::cout << weight[l] << " " << weight_den[l] << std::endl;
+		}
+		if (s_vec[i] == "left")
+			weight.swap(left_weights);
+		else if (s_vec[i] == "right")
+			weight.swap(right_weights);
+		else if (s_vec[i] == "potential")
+			weight.swap(potential);
+	}
+	return;
+  }
+
+  void
+  eigen_problem::set_coefficients(const vector_function_type & f_vec, const vector_string_type & s_vec)
+  {
+    GMM_ASSERT1((f_vec.size() == s_vec.size()) && (f_vec.size() <= 3) && (!f_vec.empty()), "Input data has invalid size.");
+    for (unsigned i = 0; i < f_vec.size(); i++) {
+	  vector_type weight(n_totalvert);
+   	  for (unsigned i = 0; i < meshg.points().size(); i++)
+   	 	weight[i] = f_vec[i](meshg.points()[i]);
+  	  GMM_ASSERT1(s_vec[i] == "left" || s_vec[i] == "right" || s_vec[i] == "potential", "Invalid string input data.");
+  	  if (s_vec[i] == "left")
+  		  weight.swap(left_weights);
+  	  else if (s_vec[i] == "right")
+  		  weight.swap(right_weights);
+  	  else if (s_vec[i] == "potential")
+  		  weight.swap(potential);
+    }
+    return;
+  }
+
+  scalar_type
+  eigen_problem::compute_circular_mean(
+    const unsigned & n_mean_points,
+    const scalar_type & radius,
+    const base_node & point,
+    const vector_type & tg_vector,
+    const function_type & f)
+  {
+    std::vector<base_node> mean_points(n_mean_points);
+    for(size_type i=0; i<n_mean_points; i++){
+	  mean_points[i].resize(3);
+      mean_points[i][0] = radius*cos(2*M_PI*i/n_mean_points);
+      mean_points[i][1] = 0.0;
+      mean_points[i][2] = radius*sin(2*M_PI*i/n_mean_points);
+    }
+    dense_matrix_type Rotx_1(3,3);
+    dense_matrix_type Rotx_2(3,3);
+    dense_matrix_type Rotz_1(3,3);
+    dense_matrix_type Rotz_2(3,3);
+
+	//indexes must start from 0!!
+    Rotx_1(0,0) = 1;
+    Rotx_1(0,1) = 0;
+    Rotx_1(0,2) = 0;
+    Rotx_1(1,0) = 0;
+    Rotx_1(1,1) = sqrt(1-tg_vector[2]*tg_vector[2]);
+    Rotx_1(1,2) = -tg_vector[2];
+    Rotx_1(2,0) = 0;
+    Rotx_1(2,1) = tg_vector[2];
+    Rotx_1(2,2) = sqrt(1-tg_vector[2]*tg_vector[2]);
+
+    Rotx_2(0,0) = 1;
+    Rotx_2(0,1) = 0;
+    Rotx_2(0,2) = 0;
+    Rotx_2(1,0) = 0;
+    Rotx_2(1,1) = -sqrt(1-tg_vector[2]*tg_vector[2]);
+    Rotx_2(1,2) = -tg_vector[2];
+    Rotx_2(2,0) = 0;
+    Rotx_2(2,1) = tg_vector[2];
+    Rotx_2(2,2) = -sqrt(1-tg_vector[2]*tg_vector[2]);
+
+    Rotz_1(0,0) = sqrt(1-tg_vector[0]*tg_vector[0]);
+    Rotz_1(0,1) = -tg_vector[0];
+    Rotz_1(0,2) = 0;
+    Rotz_1(1,0) = tg_vector[0];
+    Rotz_1(1,1) = sqrt(1-tg_vector[0]*tg_vector[0]);
+    Rotz_1(1,2) = 0;
+    Rotz_1(2,0) = 0;
+    Rotz_1(2,1) = 0;
+    Rotz_1(2,2) = 1;
+
+    Rotz_2(0,0) = -sqrt(1-tg_vector[0]*tg_vector[0]);
+    Rotz_2(0,1) = -tg_vector[0];
+    Rotz_2(0,2) = 0;
+    Rotz_2(1,0) = tg_vector[0];
+    Rotz_2(1,1) = -sqrt(1-tg_vector[0]*tg_vector[0]);
+    Rotz_2(1,2) = 0;
+    Rotz_2(2,0) = 0;
+    Rotz_2(2,1) = 0;
+    Rotz_2(2,2) = 1;
+    vector_type v,w;
+    v.resize(3); w.resize(3);
+	for(size_type i=0; i<n_mean_points; i++){
+      v[0] = mean_points[i][0]; v[1] = mean_points[i][1]; v[2] = mean_points[i][2];
+      if (tg_vector[1]>0){
+        gmm::mult(Rotx_1,v,w);
+        gmm::mult(Rotz_1,w,v);
+      }
+      else{
+        gmm::mult(Rotx_2,v,w);
+        gmm::mult(Rotz_2,w,v);
+      }
+      mean_points[i][0] = v[0] + point[0]; mean_points[i][1] =  v[1] + point[1]; mean_points[i][2] = v[2] + point[2];
+    }
+    scalar_type mean = 0.0;
+    for(size_type i=0; i<n_mean_points; i++){
+      mean += f(mean_points[i]);
+    }
+    mean = mean/n_mean_points;
+    return mean;
+  }
+
 
 	void
 	eigen_problem::assembly(void)
@@ -149,8 +317,7 @@ namespace getfem {
 		#endif
 
 		L.resize(n_totalvert, n_totalvert);
-		vector_type coeff_val(n_totalvert, 1);
-		getfem::asm_stiffness_matrix_for_laplacian(L, mimg, mf_Ug, mf_coeffg, coeff_val);
+		getfem::asm_stiffness_matrix_for_laplacian(L, mimg, mf_Ug, mf_coeffg, left_weights);
 		gmm::clean(L, 1E-10);
 
 		return;
@@ -164,7 +331,7 @@ namespace getfem {
 		#endif
 
 		M.resize(n_totalvert, n_totalvert);
-		getfem::asm_mass_matrix(M, mimg, mf_Ug, mf_coeffg);
+		getfem::asm_mass_matrix_param(M, mimg, mf_Ug, mf_coeffg, right_weights);
 		gmm::clean(M, 1E-10);
 
 		return;
@@ -177,15 +344,10 @@ namespace getfem {
 		std::cout << "[eigen_problem] Assembling operator matrix A..." << std::endl;
 		#endif
 
+		V.resize(n_totalvert, n_totalvert);
+		getfem::asm_mass_matrix_param(V, mimg, mf_Ug, mf_coeffg, potential);
 		A.resize(n_totalvert, n_totalvert);
-		if (descr.OPERATOR == "Laplacian")
-			gmm::copy(L, A);
-
-		else if (descr.OPERATOR == "Hamiltonian")
-			gmm::add(L, M, A);
-
-		else
-			std::cout << "[eigen_problem] Invalid operator descriptor." << std::endl;
+		gmm::add(L, V, A);
 
 		return;
 	}
@@ -246,11 +408,6 @@ namespace getfem {
 			}
 			GMM_STANDARD_CATCH_ERROR;
 		}
-
-		else if (descr.COMP_METHOD == "pencil_thm") {
-			// to be defined
-		}
-
 		else if (descr.COMP_METHOD == "QZ") {
 			#ifdef FEMG_VERBOSE_
 			std::cout << "[eigen_problem] Solving the problem via QZ algorithm..." << std::endl;
@@ -340,7 +497,7 @@ namespace getfem {
 		unsigned n_digits = std::to_string(n_totalvert).size();
 		unsigned i = 1;
 		std::ostringstream dir_name_builder;
-		dir_name_builder << output << "export/" << descr.OPERATOR << "/"<< std::to_string(n_totalvert) + " point-mesh/" << descr.COMP_METHOD;
+		dir_name_builder << output << "export/" << std::to_string(n_totalvert) + " point-mesh/" << descr.COMP_METHOD;
 		boost::filesystem::path dir(dir_name_builder.str().c_str());
 		boost::system::error_code ec;
 		bool status = boost::filesystem::create_directories(dir, ec);

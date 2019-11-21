@@ -69,7 +69,7 @@ namespace getfem {
 
 /*!
 	Import the network points from the file of points (pts) and build the mesh.
-
+unsigned dim_prob;
 	\ingroup geom
  */
 //! \note It also build vessel mesh regions (#=0 for branch 0, #=1 for branch 1, ...).
@@ -80,6 +80,8 @@ import_pts_file(
 		getfem::mesh & mh1D,
 		std::vector<getfem::node> &  BCList,
 		size_type & n_original,
+		unsigned & dim_prob,
+		std::vector<vector_type> & tg_vectors,
     //vector_type & mesh_step,
 		VEC & Nn,
 		const std::string & MESH_TYPE
@@ -91,7 +93,6 @@ import_pts_file(
 	Nn.resize(0); Nn.clear();
 	mh1D.clear();
 	bool dim_check = true;
-	unsigned dim_prob;
 
 	ist.precision(16);
 	ist.seekg(0); ist.clear();
@@ -103,6 +104,7 @@ import_pts_file(
   std::vector<base_node> rpoints;
   std::vector<base_node> spoints;
   std::vector<size_type> BC_check;
+	std::vector<vector_type> branch_tg;
 
 	while (bgeot::read_until(ist, "BEGIN_ARC")) {
 
@@ -226,6 +228,14 @@ import_pts_file(
 		// Check validity of branch region
 		GMM_ASSERT1(mh1D.has_region(Nb-1)==0, "Overload in meshv region assembling!");
 
+		branch_tg.resize(Nb);
+		for (unsigned i = 0; i<dim_prob; i++){
+			branch_tg[Nb-1].push_back(lpoints[1][i]-lpoints[0][i]);
+		}
+		scalar_type norm = sqrt(branch_tg[Nb-1][0]*branch_tg[Nb-1][0]+branch_tg[Nb-1][1]*branch_tg[Nb-1][1]+branch_tg[Nb-1][2]*branch_tg[Nb-1][2]);
+		for (unsigned i = 0; i<dim_prob; i++){
+			branch_tg[Nb-1][i] = branch_tg[Nb-1][i]/norm;
+		}
 
     //storing real points, their successor and the vector storing info for then assigning the right boundary condition
     rpoints.push_back(lpoints[0]);
@@ -250,18 +260,20 @@ import_pts_file(
       BC_check.push_back(0);
 
 		//adding to the mesh internal points and sub-arcs only between internal points
-		for (size_type i=2; i<lpoints.size()-1; ++i ){
+		std::vector<size_type> ind(2);
+		size_type cv;
 
-			std::vector<size_type> ind(2);
+		for (size_type i=2; i<lpoints.size()-1; ++i ){
 			ind[0] = mh1D.add_point(lpoints[i]);
 			ind[1] = mh1D.add_point(lpoints[i+1]);
-			size_type cv;
+
 			cv = mh1D.add_convex(bgeot::simplex_geotrans(1,1), ind.begin());
 
 			// Build branch regions
 			mh1D.region(Nb-1).add(cv);
 
 		} /* end of inner for */
+
 		//mesh_step.push_back(0); // it will be the (Nb-1)-th element
 		//for (unsigned k = 0; k < rpoints[last_added].size(); k++) {
 		//	mesh_step[Nb-1] += (rpoints[last_added][k]-spoints[last_added][k])*(rpoints[last_added][k]-spoints[last_added][k]);
@@ -271,7 +283,9 @@ import_pts_file(
 	} /* end of outer while (end of an branch) */
 	std::set<base_node> realpoints(rpoints.begin(), rpoints.end());
 	n_original = realpoints.size();
-
+	for (size_type b=0; b<Nb; ++b)
+		for (unsigned i = 0; i < mh1D.region(b).nb_convex()+1; ++i)
+      tg_vectors.push_back(branch_tg[b]);
   //adding to the mesh points and sub-arcs that have a real point
   for (size_type i=0; i<rpoints.size(); ++i){
 
@@ -282,13 +296,68 @@ import_pts_file(
 			cv = mh1D.add_convex(bgeot::simplex_geotrans(1,1), ind.begin());
             mh1D.region(Nb).add(cv);
 
+			vector_type v_tg;
+			for (unsigned j = 0; j<dim_prob; j++){
+				v_tg.push_back(rpoints[i][j]-spoints[i][j]);
+			}
+			scalar_type norm = sqrt(v_tg[0]*v_tg[0]+v_tg[1]*v_tg[1]+v_tg[2]*v_tg[2]);
+			for (unsigned j = 0; j<dim_prob; j++){
+				v_tg[j] = v_tg[j]/norm;
+			}
+      tg_vectors.push_back(v_tg);
       //assigning boundary condition to the corresponding point
       if (BC_check[i]>0)
           BCList[BC_check[i]-1].idx = ind[0];
 
 	} /*end of rpoints for */
 
+	// mesh of the problem and of the coefficient need to have the same number of dofs
+
 } /* end of import_pts_file */
+
+template<typename VEC>
+void
+import_network_radius
+	(VEC & Radius,
+	 //GR VEC & Radius_i,
+	 const size_type & branches,
+ 	 std::istream & ist,
+ 	 const getfem::mesh & mh1D,
+	 const std::vector<vector_type> tg
+ 	 )
+{
+	// Try to read data from pts file
+	vector_type Rdata;
+	ist.precision(16);
+	ist.seekg(0); ist.clear();
+	GMM_ASSERT1(bgeot::read_until(ist, "BEGIN_LIST"), "This seems not to be a data file");
+	std::string line;
+	size_type nb_branches = 0;
+	bool thend = false;
+	while (!thend){
+		bgeot::get_token(ist, line, 1023);
+		thend = (line=="END_LIST");
+		if (!thend){
+			Rdata.emplace_back(stof(line));
+			nb_branches++;
+		}
+	}
+	GMM_ASSERT1(nb_branches == branches, "Number of given radii is not equal to the number of branches!");
+
+	for (size_type b=0; b<nb_branches; ++b)
+		for (unsigned i = 0; i < mh1D.region(b).nb_convex()+1; ++i)
+			Radius.push_back(Rdata[b]);
+
+	size_type index = Radius.size();
+  for (unsigned i = index; i<tg.size(); i++){
+    unsigned pos = 0;
+		while(pos<index & (abs(tg[pos][0]-tg[i][0]) + abs(tg[pos][1]-tg[i][1]) + abs(tg[pos][2]-tg[i][2]) > 1e-3))
+		  pos++;
+		GMM_ASSERT1(pos<index, "ERROR: Unconsistent tangent versor");
+		Radius.push_back(Radius[pos]);
+	}
+
+}
 
 } // end of namespace
 #endif

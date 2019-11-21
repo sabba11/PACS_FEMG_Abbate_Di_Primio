@@ -3,6 +3,11 @@
 %=======================================================================================
 % Flag to export results
 EXPORT = 1;
+% Importing radius for the calculation of the external sources
+% Boolean
+IMPORT_RADIUS = 1;
+% Path of the file containing the radii
+RFILE = './radius.pts';
 % Directory in which solutions will be exported, leave empty to choose
 % the directory containing main.
 OUTPUT = 'star/';
@@ -10,7 +15,7 @@ OUTPUT = 'star/';
 %  MESH
 %===================================
 % Path to import the 1d list of points
-MESH_FILEG = '../../data_builder/data/star_5.pts'
+MESH_FILEG = '../../data_builder/data/star.pts'
 %===================================
 %  GETFEM DESCRIPTORS
 %===================================
@@ -37,10 +42,10 @@ TOL = 1E-12;
 %=================================================================
 % Operator whose eigenvalues are computed
 % OPERATOR: 'Laplacian', 'Hamiltonian'
-OPERATOR = 'Hamiltonian'
+% OPERATOR = 'Hamiltonian'
 
 % Computational method
-% COMP_METHOD: 'QR', 'pencil_thm'
+% COMP_METHOD: 'QR', 'QZ'
 COMP_METHOD = 'QR'
 %=================================================================
 % 2. ELLIPTIC PROBLEM FLAGS

@@ -4,8 +4,10 @@
 #define FEMG_TYPE_ALIASES_HPP
 
 #include <complex>
+#include <functional>
 #include <gmm/gmm.h>
 #include <getfem/getfem_import.h>
+#include <getfem/getfem_assembling.h>
 
 namespace getfem {
 
@@ -17,6 +19,9 @@ namespace getfem {
 	typedef std::vector<size_type> vector_size_type;
 	typedef std::vector<scalar_type> vector_type;
 	typedef std::vector<complex_scalar_type> complex_vector_type;
+	typedef std::function<scalar_type(base_node)> function_type;
+	typedef std::vector<std::function<scalar_type(base_node)>> vector_function_type;
+	typedef std::vector<std::string> vector_string_type;
 
 	//gmm namespace
 	typedef gmm::rsvector<scalar_type> sparse_vector_type;

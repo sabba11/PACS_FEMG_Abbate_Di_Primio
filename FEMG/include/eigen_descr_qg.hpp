@@ -7,8 +7,11 @@
 namespace getfem {
 
 	struct eigen_descr_qg : descr_qg {
-		//Operator whose eigenvalues are computed
-		std::string OPERATOR;
+		//File from which we have to import the radii
+    std::string RFILE;
+
+		// Flag for importing the radius
+		bool IMPORT_RADIUS;
 
 		//Computational method
 		std::string COMP_METHOD;

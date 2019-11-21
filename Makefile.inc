@@ -18,7 +18,7 @@ BGL_INC_DIR      = $(mkBGLInc)
 export mkBGLInc = /u/sw/pkgs/toolchains/gcc-glibc/7/pkgs/boost/1.63.0/include
 
 # Collect all includes
-ALL_INC_DIR= $(EIGEN_INC_DIR) $(GETFEM_INC_DIR) $(BGL_INC_DIR)
+ALL_INC_DIR= $(GETFEM_INC_DIR) $(BGL_INC_DIR)
 includes := $(foreach inc,$(ALL_INC_DIR),-I$(inc))
 INCLUDES += -I. -I./include $(includes)
 
