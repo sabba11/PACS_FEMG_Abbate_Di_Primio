@@ -1,0 +1,5 @@
+Exporting successful.
+Time for matrix inversion (seconds): 0.587605
+Time for matrix multiplication (seconds): 122.68
+Time to QR convergence (seconds): 16.0053
+Time to compute eigencouples (seconds): 170.842
