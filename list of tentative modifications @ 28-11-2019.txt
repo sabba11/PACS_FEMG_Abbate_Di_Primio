@@ -1,0 +1,12 @@
+Things to be defined:
+- namespaces: keep getfem or change?
+- abstract class: good practice to have protected constructor?
+- structure of init procedure: possibly modify, in quantumproblem, virtual init but not = 0, while aux methods pure virtual 
+  (import data, build mesh, ecc...)
+- found duplicate definition of auxiliary methods in qgproblem.hpp and eigen_problem.hpp, to be corrected
+- radii: data structure in quantum graph, but input structure in eigen_problem, to be uniformed
+- cleaned useless data structures in eigen_problem.hpp (potential "matrix" duplicate)
+- mf_coeffbranchg used?
+- log_data possibly to be shifted in quantum_graph_problem.hpp
+- create function to set coefficient to default?
+- altro...
