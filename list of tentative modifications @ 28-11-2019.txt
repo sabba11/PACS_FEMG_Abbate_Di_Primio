@@ -1,12 +1,36 @@
 Things to be defined:
+ask to Pasquale:
 - namespaces: keep getfem or change?
 - abstract class: good practice to have protected constructor?
-- structure of init procedure: possibly modify, in quantumproblem, virtual init but not = 0, while aux methods pure virtual 
-  (import data, build mesh, ecc...)
-- found duplicate definition of auxiliary methods in qgproblem.hpp and eigen_problem.hpp, to be corrected
-- radii: data structure in quantum graph, but input structure in eigen_problem, to be uniformed
-- cleaned useless data structures in eigen_problem.hpp (potential "matrix" duplicate)
-- mf_coeffbranchg used?
-- log_data possibly to be shifted in quantum_graph_problem.hpp
-- create function to set coefficient to default?
-- altro...
+-----------------------------------------------------------------------
+Modifications already implemented @29.11:
+- now init is only virtual, while its subroutines are pure virtual. The user can define eventually unused methods to empty. By default, it executes all pure virtual subroutines.
+- now log_data is a protected data member of quantum graph problem.
+- now all headers in FEMG have doxy-like comments.
+- now init also runs a set_default_coefficient methods (pure virtual method in quantum graph)
+- now unused data structures are cleaned, aside of coeffbranchg (maybe to be cleaned)
+- now radii and output "descriptors" are in descr_qg and not in child structs. Updated print and import routines accordingly.
+- now RFILE is read only if IMPORT_RADIUS = 1.
+- now ITER is read as an integer, instead of as a real.
+- now set_coefficients(args) is a pure virtual method in quantum_graph_problem that gets overridden and overloaded.
+  set_source(args) is always called for clarity purposes.
+- now invalid descriptors throw a GMM exception
+
+Possible modifications to do:
+- delete mf_coeffbranchg
+
+Definitely to be done:
+- add const keywords if correct
+- beautify .param. Insert comments, flag that COMP_METHOD is case sensitive or implement something
+- insert box with authors and "copyright"
+- check if solve can return False and update main.cpp
+- insert well-posedness check in elliptic_problem
+- polish verbose mode
+- readme files on git
+- comment a little more .cpp files
+
+
+
+
+
+
