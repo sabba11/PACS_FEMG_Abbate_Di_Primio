@@ -4,20 +4,19 @@
 % initial and final points coordinates with boundary conditions afterwards).
 % It is a 2 dimensional graph in the box [0,L;0,L] made by two exagon
 % linked by an edge
-% The setting and the points are saved as like as it is a 3d graph
+% The setting and the points are saved as like as it is a 3d graph;
+% You can build it 2-dimensional just by commenting the signaled line.
 %
 % Input parameters:
 % out_filename = name of the output file. Put it in the ./data folder.
-%     ndim    = dimension of the problem (in this case is 2)
+%     ndim     = dimension of the problem (in this case is 2)
 %       L      = length of the box containing the graphene
-
-
 
 close all
 clear all
-
 addpath('./matlab_functions')
 
+% PARAMETERS
 % Number of vertexes
 n = 12;
 % Setting dimension of the problem
@@ -25,25 +24,21 @@ ndim = 2;
 % ndim = 3;
 % Output file name
 out_filename = '../data/graphene.txt';
-
 % Box lenght
 L = 5;
-% Vettore coordinate
-points = zeros(n,2);
 
 % COORDINATES
+% Coordinates vector
+points = zeros(n,2);
 % The two exagons
-
 for i= 1:6
     points(i,:) = [L/5+L/5*cos((i-1)*2*pi/6),L/2+L/5*sin((i-1)*2*pi/6)];
     points(i+6,:) = [4*L/5+L/5*cos((i-1)*2*pi/6),L/2+L/5*sin((i-1)*2*pi/6)];
 end
-
 %Augmenting dimension
 if ndim == 3
     points = FEMG_augment_dim(points);
 end
-
 points(:,2) = points(:,2) - ones(length(points(:,2)),1)*points(5,2) ;
 
 % CONNECTION OF THE VERTEXES
@@ -58,7 +53,6 @@ con_vectors(1,1:2) = [2,6];
 con_vectors(6,1:2) = [1,5];
 con_vectors(7,1:2) = [8,12];
 con_vectors(12,1:2) = [7,11];
-
 % Central line
 con_vectors(1,3) = 10;
 con_vectors(10,3) = 1;
@@ -72,15 +66,12 @@ BC = zeros(n,5);
 % Assign outflow and internal
 [BC] = FEMG_assign_cond(BC,n,Matrix_adj);
 
-
-
 % Writing output and plotting the graph
 [Edges,Finaltext] = FEMG_build_graphtext(ndim,n,points,Matrix_adj,BC);
-
+% Plot
 if ndim == 2
     FEMG_plot2d_graph(Edges,points)
 else
     FEMG_plot3d_graph(Edges,points)
 end
-
 dlmwrite(out_filename, Finaltext, 'delimiter', '');
