@@ -49,7 +49,7 @@ namespace getfem {
 
 		//! Path to output directory for export routines.
 		std::string OUTPUT;
-		
+
 		//! Input file from which descriptors are read.
 		ftool::md_param FILE_;
 
@@ -62,6 +62,20 @@ namespace getfem {
 					 ftool::md_param FILE_ is not a descriptor.
 		*/
 		void import_all(ftool::md_param & fname);
+
+		//! Overload of operator<< to print descriptors.
+		/*!
+			Same as print_all(). Use this operator to print desciptors.
+			\return reference to ostream.
+			\param out reference to ostream.
+			\param descr the descriptor to be printed.
+		*/
+		friend inline std::ostream &
+		operator<< (std::ostream & out, const descr_qg & descr)
+		{
+			descr.print_all();
+			return out;
+		}
 
 	protected:
 		//! Method to print all descriptors to screen, called by operator<<.
@@ -88,19 +102,5 @@ namespace getfem {
 		*/
 		virtual void import(ftool::md_param & fname) = 0;
 	};
-
-	//! Overload of operator<< to print descriptors.
-	/*!
-		Same as print_all(). Use this operator to print desciptors.
-		\return reference to ostream.
-		\param out reference to ostream.
-		\param descr the descriptor to be printed.
-	*/
-	friend inline std::ostream &
-	operator<< (std::ostream & out, const descr_qg & descr)
-	{
-		descr.print_all();
-		return out;
-	}
 }
 #endif
