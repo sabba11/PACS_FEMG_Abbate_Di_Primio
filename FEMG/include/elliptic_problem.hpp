@@ -91,6 +91,9 @@ namespace getfem {
 		//! Laplacian matrix of the extended graph.
 		sparse_matrix_type L;
 
+		//! Potential matrix.
+		sparse_matrix_type V;
+		
 		//! Source term at rhs of the differential problem.
 		vector_type F_source;
 

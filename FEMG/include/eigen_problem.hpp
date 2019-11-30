@@ -76,6 +76,9 @@ namespace getfem {
 		//! Laplacian matrix of the extended graph.
 		sparse_matrix_type L;
 
+		//! Potential matrix.
+		sparse_matrix_type V;
+
 		//! Weight vector for mass (function p(x)).
 		vector_type right_weights;
 
