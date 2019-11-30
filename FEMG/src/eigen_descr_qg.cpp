@@ -5,13 +5,10 @@ namespace getfem {
 	void
 	eigen_descr_qg::import(ftool::md_param & fname)
 	{
-    IMPORT_RADIUS = FILE_.int_value("IMPORT_RADIUS", "Import Radius Flag");
-    RFILE  = FILE_.string_value("RFILE", "Input file for radii");
 		COMP_METHOD  = FILE_.string_value("COMP_METHOD", "Computational method");
 		OUTPUT = FILE_.string_value("OUTPUT","Output directory");
 		TOL = FILE_.real_value("TOL", "Residue tolerance");
-		if (!eigen_check_validity())
-			std::cerr << "Invalid COMP_METHOD or TOL in .param file." << std::endl;
+		GMM_ASSERT1(eigen_check_validity(), "Invalid COMP_METHOD or TOL in .param file.");
 		return;
 	}
 
@@ -31,11 +28,6 @@ namespace getfem {
 		std::cout << "--------------------------------------------------" << std::endl;
 		std::cout << " COMPUTATIONAL METHOD      : " << COMP_METHOD << std::endl;
 		std::cout << " TOLERANCE                 : " << TOL << std::endl;
-		std::cout << "--------------------------------------------------" << std::endl;
-		std::string s = (IMPORT_RADIUS == 1)? "Yes" : "No";
-		std::cout << " IMPORT RADIUS DATA?       : " << s << std::endl;
-		if (s == "Yes")
-			std::cout << " RADIUS DATA FILE          : " << RFILE << std::endl;
 		return;
 	}
 

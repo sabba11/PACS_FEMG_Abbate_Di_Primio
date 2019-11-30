@@ -13,6 +13,10 @@ namespace getfem {
 		FEM_TYPEG   = FILE_.string_value("FEM_TYPEG", "FEM type - solution");
 		FEM_TYPEG_DATA = FILE_.string_value("FEM_TYPEG_DATA", "FEM type - coefficients");
 		IM_TYPEG 	= FILE_.string_value("IM_TYPEG","Name of integration method");
+		IMPORT_RADIUS = FILE_.int_value("IMPORT_RADIUS", "Import Radius Flag");
+		if (IMPORT_RADIUS)
+			RFILE  = FILE_.string_value("RFILE", "Input file for radii");
+		OUTPUT = FILE_.string_value("OUTPUT", "Output directory");
 		import(fname);
 		return;
 	}
@@ -27,6 +31,11 @@ namespace getfem {
 		std::cout << " FEM TYPE (SOLUTION)       : " << FEM_TYPEG   << std::endl;
 		std::cout << " FEM TYPE (COEFFICIENTS)   : " << FEM_TYPEG_DATA << std::endl;
 		std::cout << " IM TYPE (GRAPH)           : " << IM_TYPEG	  << std::endl;
+		std::cout << "--------------------------------------------------" << std::endl;
+		std::string s = (IMPORT_RADIUS == 1)? "Yes" : "No";
+		std::cout << " IMPORT RADIUS DATA?       : " << s << std::endl;
+		if (s == "Yes")
+			std::cout << " RADIUS DATA FILE          : " << RFILE << std::endl;
 		print();
 		std::cout << "--------------------------------------------------" << std::endl;
 		return;
