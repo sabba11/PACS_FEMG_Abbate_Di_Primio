@@ -23,7 +23,7 @@
 #include "eigen_problem.hpp"
 #include "mesh_1d.hpp"
 
- extern "C" {void dggev_( char* jobvl, char* jobvr, long unsigned int* na, double* a, long unsigned int* nb, double* b,
+extern "C" {void dggev_( char* jobvl, char* jobvr, long unsigned int* na, double* a, long unsigned int* nb, double* b,
                          long unsigned int* lda, double* wr, double* wi, double* wd, double* vl, long unsigned int* ldvl,
                          double* vr, long unsigned int* ldvr, double* work, long int* lwork, long int* info );}
 // extern void dggev_( char* jobvl, char* jobvr, long unsigned int* na, double* a, long unsigned int* nb, double* b,
@@ -31,33 +31,6 @@
 //                 double* vr, long unsigned int* ldvr, double* work, long int* lwork, long int* info );
 
 namespace getfem {
-
-	void
-	eigen_problem::init(int argc, char *argv[])
-	{
-	     //1. Read the .param filename from standard input
-	     INPUT.read_command_line(argc, argv);
-
-	     //2. Import data (algorithm specifications, boundary conditions,...)
-	     import_data();
-
-	     //3. Build mesh for the graph
-	     build_mesh();
-
-	     //4. Set finite elements and integration methods
-	     set_im_and_fem();
-
-	     //5. Build problem parameters
-	     build_param();
-
-		   //6. Set default values for coefficients
-	 	   left_weights = vector_type(n_totalvert, 1.0);
-		   right_weights = vector_type(n_totalvert, 1.0);
-		   potential = vector_type(n_totalvert, 0.0);
-
-	     //7. Build the lists of the data of the vertices
-	     // build_vertices_lists();
-	}
 
 	void
 	eigen_problem::import_data()
@@ -131,18 +104,22 @@ namespace getfem {
       return;
 	}
 
+	void
+	eigen_problem::set_default_coefficients(void)
+	{
+		#ifdef FEMG_VERBOSE_
+		std::cout << "Setting coefficients at default values..." << std::endl;
+		#endif
+		left_weights = vector_type(n_totalvert, 1.0);
+		right_weights = vector_type(n_totalvert, 1.0);
+		potential = vector_type(n_totalvert, 0.0);
+		return;
+	}
 
-  // Possibly, build this function
-	// void
-	// eigen_problem::build_vertices_lists(void)
-	// {
-	//     //to be defined
-	// }
-
-  //Builds coefficient vectors
-  void
-  eigen_problem::set_coefficients(const vector_function_type & f_vec, const vector_string_type & s_vec, const unsigned & n_mean_points)
-  {
+  	//Builds coefficient vectors
+	void
+	eigen_problem::set_coefficients(const vector_function_type & f_vec, const vector_string_type & s_vec, const unsigned & n_mean_points)
+	{
 	GMM_ASSERT1((f_vec.size() == s_vec.size()) && (f_vec.size() <= 3) && (!f_vec.empty()), "Input data has invalid size.");
 	for (unsigned i = 0; i < f_vec.size(); i++) {
 		vector_size_type weight_den(n_totalvert, 0);
@@ -191,109 +168,108 @@ namespace getfem {
 			weight.swap(potential);
 	}
 	return;
-  }
+	}
 
-  void
-  eigen_problem::set_coefficients(const vector_function_type & f_vec, const vector_string_type & s_vec)
-  {
-    GMM_ASSERT1((f_vec.size() == s_vec.size()) && (f_vec.size() <= 3) && (!f_vec.empty()), "Input data has invalid size.");
-    for (unsigned i = 0; i < f_vec.size(); i++) {
+	void
+	eigen_problem::set_coefficients(const vector_function_type & f_vec, const vector_string_type & s_vec)
+	{
+	GMM_ASSERT1((f_vec.size() == s_vec.size()) && (f_vec.size() <= 3) && (!f_vec.empty()), "Input data has invalid size.");
+	for (unsigned i = 0; i < f_vec.size(); i++) {
 	  vector_type weight(n_totalvert);
-   	  for (unsigned i = 0; i < meshg.points().size(); i++)
-   	 	weight[i] = f_vec[i](meshg.points()[i]);
-  	  GMM_ASSERT1(s_vec[i] == "left" || s_vec[i] == "right" || s_vec[i] == "potential", "Invalid string input data.");
-  	  if (s_vec[i] == "left")
-  		  weight.swap(left_weights);
-  	  else if (s_vec[i] == "right")
-  		  weight.swap(right_weights);
-  	  else if (s_vec[i] == "potential")
-  		  weight.swap(potential);
-    }
-    return;
-  }
+		  for (unsigned i = 0; i < meshg.points().size(); i++)
+		 	weight[i] = f_vec[i](meshg.points()[i]);
+		  GMM_ASSERT1(s_vec[i] == "left" || s_vec[i] == "right" || s_vec[i] == "potential", "Invalid string input data.");
+		  if (s_vec[i] == "left")
+			  weight.swap(left_weights);
+		  else if (s_vec[i] == "right")
+			  weight.swap(right_weights);
+		  else if (s_vec[i] == "potential")
+			  weight.swap(potential);
+	}
+	return;
+	}
 
-  scalar_type
-  eigen_problem::compute_circular_mean(
-    const unsigned & n_mean_points,
-    const scalar_type & radius,
-    const base_node & point,
-    const vector_type & tg_vector,
-    const function_type & f)
-  {
-    std::vector<base_node> mean_points(n_mean_points);
-    for(size_type i=0; i<n_mean_points; i++){
+	scalar_type
+	eigen_problem::compute_circular_mean(
+	const unsigned & n_mean_points,
+	const scalar_type & radius,
+	const base_node & point,
+	const vector_type & tg_vector,
+	const function_type & f)
+	{
+	std::vector<base_node> mean_points(n_mean_points);
+	for(size_type i=0; i<n_mean_points; i++){
 	  mean_points[i].resize(3);
-      mean_points[i][0] = radius*cos(2*M_PI*i/n_mean_points);
-      mean_points[i][1] = 0.0;
-      mean_points[i][2] = radius*sin(2*M_PI*i/n_mean_points);
-    }
-    dense_matrix_type Rotx_1(3,3);
-    dense_matrix_type Rotx_2(3,3);
-    dense_matrix_type Rotz_1(3,3);
-    dense_matrix_type Rotz_2(3,3);
+	  mean_points[i][0] = radius*cos(2*M_PI*i/n_mean_points);
+	  mean_points[i][1] = 0.0;
+	  mean_points[i][2] = radius*sin(2*M_PI*i/n_mean_points);
+	}
+	dense_matrix_type Rotx_1(3,3);
+	dense_matrix_type Rotx_2(3,3);
+	dense_matrix_type Rotz_1(3,3);
+	dense_matrix_type Rotz_2(3,3);
 
 	//indexes must start from 0!!
-    Rotx_1(0,0) = 1;
-    Rotx_1(0,1) = 0;
-    Rotx_1(0,2) = 0;
-    Rotx_1(1,0) = 0;
-    Rotx_1(1,1) = sqrt(1-tg_vector[2]*tg_vector[2]);
-    Rotx_1(1,2) = -tg_vector[2];
-    Rotx_1(2,0) = 0;
-    Rotx_1(2,1) = tg_vector[2];
-    Rotx_1(2,2) = sqrt(1-tg_vector[2]*tg_vector[2]);
+	Rotx_1(0,0) = 1;
+	Rotx_1(0,1) = 0;
+	Rotx_1(0,2) = 0;
+	Rotx_1(1,0) = 0;
+	Rotx_1(1,1) = sqrt(1-tg_vector[2]*tg_vector[2]);
+	Rotx_1(1,2) = -tg_vector[2];
+	Rotx_1(2,0) = 0;
+	Rotx_1(2,1) = tg_vector[2];
+	Rotx_1(2,2) = sqrt(1-tg_vector[2]*tg_vector[2]);
 
-    Rotx_2(0,0) = 1;
-    Rotx_2(0,1) = 0;
-    Rotx_2(0,2) = 0;
-    Rotx_2(1,0) = 0;
-    Rotx_2(1,1) = -sqrt(1-tg_vector[2]*tg_vector[2]);
-    Rotx_2(1,2) = -tg_vector[2];
-    Rotx_2(2,0) = 0;
-    Rotx_2(2,1) = tg_vector[2];
-    Rotx_2(2,2) = -sqrt(1-tg_vector[2]*tg_vector[2]);
+	Rotx_2(0,0) = 1;
+	Rotx_2(0,1) = 0;
+	Rotx_2(0,2) = 0;
+	Rotx_2(1,0) = 0;
+	Rotx_2(1,1) = -sqrt(1-tg_vector[2]*tg_vector[2]);
+	Rotx_2(1,2) = -tg_vector[2];
+	Rotx_2(2,0) = 0;
+	Rotx_2(2,1) = tg_vector[2];
+	Rotx_2(2,2) = -sqrt(1-tg_vector[2]*tg_vector[2]);
 
-    Rotz_1(0,0) = sqrt(1-tg_vector[0]*tg_vector[0]);
-    Rotz_1(0,1) = -tg_vector[0];
-    Rotz_1(0,2) = 0;
-    Rotz_1(1,0) = tg_vector[0];
-    Rotz_1(1,1) = sqrt(1-tg_vector[0]*tg_vector[0]);
-    Rotz_1(1,2) = 0;
-    Rotz_1(2,0) = 0;
-    Rotz_1(2,1) = 0;
-    Rotz_1(2,2) = 1;
+	Rotz_1(0,0) = sqrt(1-tg_vector[0]*tg_vector[0]);
+	Rotz_1(0,1) = -tg_vector[0];
+	Rotz_1(0,2) = 0;
+	Rotz_1(1,0) = tg_vector[0];
+	Rotz_1(1,1) = sqrt(1-tg_vector[0]*tg_vector[0]);
+	Rotz_1(1,2) = 0;
+	Rotz_1(2,0) = 0;
+	Rotz_1(2,1) = 0;
+	Rotz_1(2,2) = 1;
 
-    Rotz_2(0,0) = -sqrt(1-tg_vector[0]*tg_vector[0]);
-    Rotz_2(0,1) = -tg_vector[0];
-    Rotz_2(0,2) = 0;
-    Rotz_2(1,0) = tg_vector[0];
-    Rotz_2(1,1) = -sqrt(1-tg_vector[0]*tg_vector[0]);
-    Rotz_2(1,2) = 0;
-    Rotz_2(2,0) = 0;
-    Rotz_2(2,1) = 0;
-    Rotz_2(2,2) = 1;
-    vector_type v,w;
-    v.resize(3); w.resize(3);
+	Rotz_2(0,0) = -sqrt(1-tg_vector[0]*tg_vector[0]);
+	Rotz_2(0,1) = -tg_vector[0];
+	Rotz_2(0,2) = 0;
+	Rotz_2(1,0) = tg_vector[0];
+	Rotz_2(1,1) = -sqrt(1-tg_vector[0]*tg_vector[0]);
+	Rotz_2(1,2) = 0;
+	Rotz_2(2,0) = 0;
+	Rotz_2(2,1) = 0;
+	Rotz_2(2,2) = 1;
+	vector_type v,w;
+	v.resize(3); w.resize(3);
 	for(size_type i=0; i<n_mean_points; i++){
-      v[0] = mean_points[i][0]; v[1] = mean_points[i][1]; v[2] = mean_points[i][2];
-      if (tg_vector[1]>0){
-        gmm::mult(Rotx_1,v,w);
-        gmm::mult(Rotz_1,w,v);
-      }
-      else{
-        gmm::mult(Rotx_2,v,w);
-        gmm::mult(Rotz_2,w,v);
-      }
-      mean_points[i][0] = v[0] + point[0]; mean_points[i][1] =  v[1] + point[1]; mean_points[i][2] = v[2] + point[2];
-    }
-    scalar_type mean = 0.0;
-    for(size_type i=0; i<n_mean_points; i++){
-      mean += f(mean_points[i]);
-    }
-    mean = mean/n_mean_points;
-    return mean;
-  }
-
+	  v[0] = mean_points[i][0]; v[1] = mean_points[i][1]; v[2] = mean_points[i][2];
+	  if (tg_vector[1]>0){
+	    gmm::mult(Rotx_1,v,w);
+	    gmm::mult(Rotz_1,w,v);
+	  }
+	  else{
+	    gmm::mult(Rotx_2,v,w);
+	    gmm::mult(Rotz_2,w,v);
+	  }
+	  mean_points[i][0] = v[0] + point[0]; mean_points[i][1] =  v[1] + point[1]; mean_points[i][2] = v[2] + point[2];
+	}
+	scalar_type mean = 0.0;
+	for(size_type i=0; i<n_mean_points; i++){
+	  mean += f(mean_points[i]);
+	}
+	mean = mean/n_mean_points;
+	return mean;
+	}
 
 	void
 	eigen_problem::assembly(void)
@@ -375,7 +351,7 @@ namespace getfem {
 				gmm::lu_inverse(inverse_mass);
 				time_inverse = clock() - time_inverse;
 				log_data.push_back(std::make_pair("Time for matrix inversion (seconds): ", static_cast<float>(time_inverse)/CLOCKS_PER_SEC));
-        time_mult = clock();
+        		time_mult = clock();
 				gmm::mult(inverse_mass, aux_H, A);
 				time_mult = clock() - time_mult;
 				log_data.push_back(std::make_pair("Time for matrix multiplication (seconds): ", static_cast<float>(time_mult)/CLOCKS_PER_SEC));
@@ -420,32 +396,32 @@ namespace getfem {
 				complex_vector_type eigvals(n_totalvert, 1);
 				scalar_type tol = descr.TOL;
 				std::cout << "[eigen_problem] Starting QZ routine..." << std::endl;
-        long info(0), lwork(-1);
+        		long info(0), lwork(-1);
 				double work1;
-        gmm::dense_matrix<double> A_blas(n_totalvert, n_totalvert);
+        		gmm::dense_matrix<double> A_blas(n_totalvert, n_totalvert);
 				gmm::copy(A, A_blas);
 				gmm::dense_matrix<double> M_blas(n_totalvert, n_totalvert);
 				gmm::copy(M, M_blas);
-        std::vector<double> eigvr(n_totalvert), eigvi(n_totalvert), eigvden(n_totalvert);
+        		std::vector<double> eigvr(n_totalvert), eigvi(n_totalvert), eigvden(n_totalvert);
 				time_eig = clock();
 				char boolleft = 'V';
 				char boolright = 'N';
-        dggev_(&boolleft, &boolright, &n_totalvert, &A_blas(0,0), &n_totalvert, &M_blas(0,0),
+        		dggev_(&boolleft, &boolright, &n_totalvert, &A_blas(0,0), &n_totalvert, &M_blas(0,0),
 				      &n_totalvert, &eigvr[0], &eigvi[0], &eigvden[0],
 							&eigvects(0,0), &n_totalvert, &eigvects(0,0), &n_totalvert, &work1, &lwork, &info);
-        lwork = long(gmm::real(work1));
-        std::vector<double> work(lwork);
+        		lwork = long(gmm::real(work1));
+        		std::vector<double> work(lwork);
 				dggev_(&boolleft, &boolright, &n_totalvert, &A_blas(0,0), &n_totalvert, &M_blas(0,0),
 				      &n_totalvert, &eigvr[0], &eigvi[0], &eigvden[0],
 							&eigvects(0,0), &n_totalvert, &eigvects(0,0), &n_totalvert, &work[0], &lwork, &info);
 				GMM_ASSERT1(!info, "QZ algorithm failed");
 
 				for (unsigned i=0; i<n_totalvert; i++){
-          eigvi[i] = eigvi[i]/eigvden[i];
-          eigvr[i] = eigvr[i]/eigvden[i];
+          			eigvi[i] = eigvi[i]/eigvden[i];
+          			eigvr[i] = eigvr[i]/eigvden[i];
 				}
-        gmm::copy(eigvr, gmm::real_part(const_cast<complex_vector_type &>(eigvals)));
-        gmm::copy(eigvi, gmm::imag_part(const_cast<complex_vector_type &>(eigvals)));
+        		gmm::copy(eigvr, gmm::real_part(const_cast<complex_vector_type &>(eigvals)));
+        		gmm::copy(eigvi, gmm::imag_part(const_cast<complex_vector_type &>(eigvals)));
 				time_eig = clock() - time_eig;
 				log_data.push_back(std::make_pair("Time to QZ convergence (seconds): ", static_cast<float>(time_eig)/CLOCKS_PER_SEC));
 
@@ -469,11 +445,9 @@ namespace getfem {
 			}
 			GMM_STANDARD_CATCH_ERROR;
 		}
-
 		else {
 			std::cout << "[eigen_problem] Invalid computational method descriptor." << std::endl;
 		}
-
 		return true;
 	}
 
