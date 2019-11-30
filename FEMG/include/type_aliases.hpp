@@ -1,4 +1,4 @@
-// Header with custom definitions. To be completed.
+// Header with custom aliases.
 
 #ifndef FEMG_TYPE_ALIASES_HPP
 #define FEMG_TYPE_ALIASES_HPP
@@ -28,8 +28,6 @@ namespace getfem {
 	typedef gmm::row_matrix<sparse_vector_type> sparse_matrix_type;
 	typedef gmm::dense_matrix<scalar_type> dense_matrix_type;
 
-	//getfem namespace
-	//could be useful to avoid namespace getfem and putting namespace femg
 }
 
 #endif

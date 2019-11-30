@@ -17,115 +17,190 @@
 #include "node.hpp"
 
 namespace getfem {
-// Abstract class of a generic differential problem defined on a graph
-class quantum_graph_problem {
-public:
-	//Sets up problem parameters and data from input file.
-	virtual void init(int argc, char *argv[]) = 0;
+	//! Abstract class to define a differential problem on a quantum graph.
+	/*!
+		The quantum_graph_problem class defines a generic differential problem
+		on a class. It is an interface with four pure virtual methods, that should
+		be called in the presented order (init, assembly, solve, sol_export) in the
+		source code generating the final executable.
+		It provides protected data members to save the imported graph's properties,
+		it initializes and links GetFEM++ finite elements and integration methods
+		to the mesh, it contains data structures to handle the resulting
+		discrete problem and finally provides auxiliary methods for init procedures.
+		To define a differential problem, inherit from this class.
+	*/
+	class quantum_graph_problem {
+	public:
+		//! Virtual method to set up the problem and various parameters.
+		/*!
+			init, by default, calls a set of pure virtual methods to set up the
+			problem.
+			\param argc number of arguments passed via terminal execution, should be 2.
+			\param argv strings passed via terminal execution, should be the name of the input file.
+		*/
+		virtual void init(int argc, char *argv[]) {
+			//1. Read the .param filename from standard input
+   	     	INPUT.read_command_line(argc, argv);
 
-	//Assembles problem matrices and vectors.
-	virtual void assembly(void) = 0;
+   	     	//2. Import data (algorithm specifications, boundary conditions,...)
+   	     	import_data();
 
-	//Solves the differential problem. Returns true if successful.
-	virtual bool solve(void) = 0;
+   	     	//3. Build mesh for the graph
+   	     	build_mesh();
 
-	//Exports the solution for external postprocessing.
-	virtual void sol_export(void) = 0;
+   	     	//4. Set finite elements and integration methods
+   	     	set_im_and_fem();
 
-	//Virtual destructor.
-	virtual ~quantum_graph_problem() {}
+   	     	//5. Build problem parameters
+   	     	build_param();
 
-protected:
-	//Protected constructor: not public since abstract class objects cannot
-	//be instantiated, links the mesh to the finite element and integration methods
-	quantum_graph_problem(void) :
-		mimg(meshg), mf_Ug(meshg), mf_coeffg(meshg) {}
+   		 	//6. Set default values for coefficients
+   	 	 	set_default_coefficients();
 
-	// VARIABLES FOR ALL MESHES, INTEGRATION METHODS AND FEMS
+   	     	//7. Build the lists of the data of the vertices
+   	     	// build_vertices_lists();
 
-	// Mesh on the graph:
-	mesh meshg;
+			return;
+		}
 
-	// Integration Method used on the edges of the graph
-	mesh_im mimg;
+		//! Method to evaluate known coefficients on the extended graph nodes.
+		/*!
+			The function evaluates the elements of f_vec on the points of the mesh and fills data structures
+			according to the keywords in s_vec.
+			\param f_vec a vector of functions.
+			\param s_vec a vector of keywords to identify elements of f_vec, possible keywords: left, right, potential for a, p and v respectively.
+		*/
+		virtual void set_coefficients(const vector_function_type & f_vec, const vector_string_type & s_vec) = 0;
+		
+		//! Virtual method to assembly problem matrices and vectors.
+		virtual void assembly(void) = 0;
 
-	// Finite Element Method on the function u
-	mesh_fem mf_Ug;
+		//! Solves the discrete problem.
+		/*!
+			\return True if successful, False if failed.
+		*/
+		virtual bool solve(void) = 0;
 
-	// Finite Element Method for PDE coefficients defined on the graph
-	mesh_fem mf_coeffg;
+		//! Exports the solution for external postprocessing.
+		virtual void sol_export(void) = 0;
 
-	// Finite Element Method for coefficient from branch to branch
-	std::vector<mesh_fem> mf_coeffbranchg;
+		//! Virtual destructor.
+		virtual ~quantum_graph_problem() {}
 
+	protected:
+		//! Protected constructor.
+		/*!
+			The constructor links integration methods and finite elements to the
+			mesh meshg. See GetFEM++ documentation for details.
+		*/
+		quantum_graph_problem(void) :
+			mimg(meshg), mf_Ug(meshg), mf_coeffg(meshg) {}
+		/*
+		+------------------------------------------------------+
+		| 1. GetFEM++ objects (mesh, integration method, fems) |
+		+------------------------------------------------------+
+		*/
+		//! Graph mesh.
+		mesh meshg;
 
-	// INPUT DATA
+		//! Integration method used on the edges of the graph.
+		mesh_im mimg;
 
-	// Input File
-	ftool::md_param INPUT;
+		//! Finite Element Method for the unknown function.
+		mesh_fem mf_Ug;
 
+		//! Finite Element Method for known coefficients defined on the graph.
+		mesh_fem mf_coeffg;
 
-	// GRAPH PARAMETERS
+		//! Finite Element Method for known coefficients from branch to branch.
+		std::vector<mesh_fem> mf_coeffbranchg;
 
-	// Dimensions of the points
-  	unsigned dim_prob;
+		/*
+		+------------------------------------------------------+
+		| 2. Input file										   |
+		+------------------------------------------------------+
+		*/
+		//! Input file.
+		ftool::md_param INPUT;
 
-	// Tangent vectors
-  	std::vector<vector_type> tg_vectors;
+		/*
+		+------------------------------------------------------+
+		| 3. Graph properties								   |
+		+------------------------------------------------------+
+		*/
+		//! Dimensions of the problem.
+	  	unsigned dim_prob;
 
-	// Number of vertices in each branch
-	vector_size_type n_vertices;
+		//! Vector of tangent vectors (one for branch).
+	  	std::vector<vector_type> tg_vectors;
 
-	// Number of branches
-	size_type n_branches;
+		//! Number of vertices in each branch.
+		vector_size_type n_vertices;
 
-	// Number of original vertices
-	size_type n_origvert;
+		//! Total number of branches.
+		size_type n_branches;
 
-	// Number of total (original and extended) vertices
-	size_type n_totalvert;
+		//! Number of vertices in the original graph.
+		size_type n_origvert;
 
-	// Discretization parameter vector (one for each branch)
- 	// vector_type mesh_step;
+		//! Number of vertices in the extended graph (i.e. including discretization nodes).
+		size_type n_totalvert;
 
-	// Possibly useful to save branch lengths?
+		// Discretization parameter vector (one for each branch).
+	 	// vector_type mesh_step;
 
+		//! Vector of BC nodes of the graph.
+		std::vector<node> BCg;
 
-	// OBJECTS OF THE GRAPH
+		//! Vector of branch radii.
+		/*!
+			Used only if IMPORT_RADIUS = 1. Stores data contained in RFILE.
+		*/
+		vector_type radii;
 
-	// List of BC nodes of the graph
-	std::vector<node> BCg;
+		/*
+		+------------------------------------------------------+
+		| 4. Data structures for the discrete problem          |
+		+------------------------------------------------------+
+		*/
+		//! Matrix for the LHS of the discrete problem.
+		sparse_matrix_type A;
 
+		//! Array of unknowns for the discrete problem.
+		vector_type U;
 
-	// MATRIXES AND VECTORS
+		/*
+		+------------------------------------------------------+
+		| 5. Pure virtual auxiliary methods for init procedure |
+		+------------------------------------------------------+
+		*/
+		//! Method to import data from input file.
+		virtual void import_data(void) = 0;
 
-	// Matrix for the LHS of the discrete problem
-	sparse_matrix_type A;
+		//! Read .pts file to create the mesh.
+		virtual void build_mesh(void) = 0;
 
-	// Array of unknowns for the discrete problem
-	vector_type U;
+		//! Set Finite Element Method and Integration method.
+		virtual void set_im_and_fem(void) = 0;
 
-  // Vector of radii
-  vector_type radii;
+		//! Build other problem parameters (for example, radii).
+		virtual void build_param(void) = 0;
 
-	// AUX METHOD FOR INIT
+		//! Set default values for known coefficients.
+		virtual void set_default_coefficients(void) = 0;
 
-	// Import algorithm specification
-	void import_data(void);
+		// Build the lists of the data of the vertices
+		// void build_vertices_lists(void);
 
-	// Build the mesh on the imported DATA
-	void build_mesh(void);
+		/*
+		+------------------------------------------------------+
+		| 6. Data structure for log data					   |
+		+------------------------------------------------------+
+		*/
+		//! Vector structure to save log data
+		std::vector<std::pair<std::string, scalar_type>> log_data;
 
-	// Set Finite Element Method and Integration Method
-	void set_im_and_fem(void);
-
-	// Build problem Parameters
-	void build_param(void);
-
-	// Build the lists of the data of the vertices
-	// void build_vertices_lists(void);
-
-}; /* end of class quantum_graph_problem */
+	}; /* end of class quantum_graph_problem */
 
 } /* end of namespace */
 

@@ -63,10 +63,6 @@
 
 namespace getfem {
 
-// bool operator==(const base_node & lhs, const base_node & rhs);
-// bool operator<(const base_node & lhs, const base_node & rhs);
-
-
 /*!
 	Import the network points from the file of points (pts) and build the mesh.
 unsigned dim_prob;
@@ -82,7 +78,7 @@ import_pts_file(
 		size_type & n_original,
 		unsigned & dim_prob,
 		std::vector<vector_type> & tg_vectors,
-    //vector_type & mesh_step,
+    	//vector_type & mesh_step,
 		VEC & Nn,
 		const std::string & MESH_TYPE
 		)

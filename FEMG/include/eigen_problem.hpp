@@ -1,5 +1,3 @@
-// Header for the derived class to describe a generalized eigenvalue problem.
-
 #ifndef FEMG_EIGEN_PROBLEM_HPP
 #define FEMG_EIGEN_PROBLEM_HPP
 
@@ -9,72 +7,129 @@
 #include <functional>
 
 namespace getfem {
-class eigen_problem : public getfem::quantum_graph_problem {
-public:
-	//Constructor.
-	eigen_problem(void) : quantum_graph_problem() {}
+	//! Derived class to define an elliptic eigenvalue problem.
+	/*!
+		The eigen_problem class, child of quantum_graph_problem, defines an
+		eigenvalue problem of the kind
+		\f[
+			 -\mathrm{div}(a(x)\nabla u) + v(x)I = \lambda p(x) u(x)
+		\f]
+		where a, v, p are given scalar functions defined on the whole graph.
+	*/
+	class eigen_problem : public getfem::quantum_graph_problem {
+	public:
+		//! Constructor. Using quantum_graph_problem constructor to link GetFEM++ objects.
+		eigen_problem(void) : quantum_graph_problem() {}
 
-	//Sets up problem parameters and data from input file.
-	virtual void init(int argc, char *argv[]) override;
+		//! Overridden method to evaluate known coefficients on the extended graph nodes.
+		/*!
+			The function evaluates the elements of f_vec on the points of the mesh and fills data structures
+			according to the keywords in s_vec.
+			\param f_vec a vector of functions.
+			\param s_vec a vector of keywords to identify elements of f_vec, possible keywords: left, right, potential for a, p and v respectively.
+		*/
+		virtual void set_coefficients(const vector_function_type & f_vec, const vector_string_type & s_vec) override;
 
-	//Builds coefficient vectors
-	void set_coefficients(const vector_function_type & f_vec, const vector_string_type & s_vec, const unsigned & n_mean_points);
-	void set_coefficients(const vector_function_type & f_vec, const vector_string_type & s_vec);
+		//! Overload method to evaluate known coefficients on the extended graph nodes.
+		/*!
+			The function evaluates data on the points of the mesh and fills data structures
+			according to the keywords in s_vec. The computation is made thinking of every
+			branch as an axis of a cylinder. The value of the coefficients in a point is given by the
+			arithmetic mean of the values of the elements of f_vec in n_mean_points points equally
+			distributed along the cylinder's circular cross section taken at that point.
+			\warning IMPORT_RADIUS should be 1 to use this method.
+			\param f_vec a vector of functions.
+			\param s_vec a vector of keywords to identify elements of f_vec, possible keywords: left, right, potential for a, p and v respectively.
+			\param n_mean_points number of points in each circle.
+		*/
+		void set_coefficients(const vector_function_type & f_vec, const vector_string_type & s_vec, const unsigned & n_mean_points);
 
-	//Assembles matrices and vectors for the problem.
-	virtual void assembly(void) override;
+		//! Override method to assemble matrices and vectors for the problem.
+		virtual void assembly(void) override;
 
-	//Solves the problem. Returns true if successful.
-	virtual bool solve(void) override;
+		//! Override method to solve the discrete problem.
+		/*!
+			\return True if successful, False if failed.
+		*/
+		virtual bool solve(void) override;
 
-	// Possibly other solve methods here, or solve(void) should eventually
-	// contain all solve methods and select one according to descriptors
+		//! Override method to export the solution for external postprocessing.
+		virtual void sol_export(void) override;
 
-	//Exports the solution for external postprocessing.
-	virtual void sol_export(void) override;
+	private:
+		/*
+		+------------------------------------------------------+
+		| 1. Descriptors struct 							   |
+		+------------------------------------------------------+
+		*/
+		//! Struct to contain all descriptors.
+		eigen_descr_qg descr;
 
-private:
-	// Algorithm descriptors
-	eigen_descr_qg descr;
+		/*
+		+------------------------------------------------------+
+		| 2. Additional structures for the discrete problem    |
+		+------------------------------------------------------+
+		*/
+		//! Mass matrix for the discrete problem.
+		sparse_matrix_type M;
 
-	// Mass matrix for the discrete problem
-	sparse_matrix_type M;
+		//! Laplacian matrix of the extended graph.
+		sparse_matrix_type L;
 
-	// Laplacian matrix of the extended graph
-	sparse_matrix_type L;
+		//! Weight vector for mass (function p(x)).
+		vector_type right_weights;
 
-	// Potential mass matrix
-	sparse_matrix_type V;
+		//! Weight vector for Laplacian (function a(x)).
+		vector_type left_weights;
 
-	// Weight matrix for mass
-	vector_type right_weights;
+		//! Potential vector (function v(x)).
+	  	vector_type potential;
 
-	// Weight matrix for Laplacian
-	vector_type left_weights;
+		//! Map to save eigenpairs.
+		std::multimap<scalar_type, vector_type> eigpairs;
 
-	// Potential matrix
-  	vector_type potential;
+		/*
+		+------------------------------------------------------+
+		| 3. Auxiliary methods								   |
+		+------------------------------------------------------+
+		*/
+		// 3.1 Auxiliary methods for init procedure
+		//! Overridden method to import data from input file.
+		virtual void import_data(void) override;
 
-	// Map to save eigenpairs
-	std::multimap<scalar_type, vector_type> eigpairs;
+		//! Overridden method to read .pts file to create the mesh.
+		virtual void build_mesh(void) override;
 
-	// Vector structure to save log data
-	std::vector<std::pair<std::string, scalar_type>>  log_data;
+		//! Overridden method to set Finite Element Method and Integration method.
+		virtual void set_im_and_fem(void) override;
 
-	//Auxiliary methods for init procedure
-	void import_data(void);
-	void build_mesh(void);
-	void set_im_and_fem(void);
-	void build_param(void);
-	//void build_vertices_lists(void);
+		//! Overridden method to build other problem parameters (for example, radii).
+		virtual void build_param(void) override;
 
-	//Auxiliary methods to build coefficients
-	scalar_type compute_circular_mean(const unsigned & n_mean_points, const scalar_type & radius, const base_node & point, const vector_type & tg_vector, const std::function<scalar_type(base_node)> & f);
+		//! Overridden method to set default values for known coefficients.
+		virtual void set_default_coefficients(void) override;
 
-	//Auxiliary methods for assembling procedure
-	void assembly_matA(void);
-	void assembly_matM(void);
-	void assembly_matL(void);
-};
+		// 3.2 Auxiliary methods to compute coefficients
+		//! Auxiliary method to compute means on cross sections.
+		/*!
+			\return value of coefficient at given point through mean on cross section.
+			\param n_mean_points number of points in each circle.
+			\param radius radius of the branch.
+			\param point coordinates of the point.
+			\param tg_vector direction of the branch.
+			\param f coefficient function.
+		*/
+		scalar_type compute_circular_mean(const unsigned & n_mean_points, const scalar_type & radius, const base_node & point, const vector_type & tg_vector, const std::function<scalar_type(base_node)> & f);
+
+		// 3.3 Auxiliary methods for assembly routines
+		//! Auxiliary method to assembly the final matrix.
+		void assembly_matA(void);
+
+		//! Auxiliary method to assembly the mass matrix.
+		void assembly_matM(void);
+
+		//! Auxiliary method to assembly the Laplace matrix.
+		void assembly_matL(void);
+	};
 } //end of namespace
 #endif
