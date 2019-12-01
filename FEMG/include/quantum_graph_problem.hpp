@@ -10,10 +10,11 @@
 
 //Standard libraries
 #include <vector>
+#include <unordered_set>
+#include <cmath>
 
 //Project headers
 #include "type_aliases.hpp"
-#include "mesh_1d.hpp"
 #include "node.hpp"
 
 namespace getfem {
@@ -52,7 +53,7 @@ namespace getfem {
    	     	set_im_and_fem();
 
    	     	//5. Build problem parameters
-   	     	build_param();
+   	     	//build_param();
 
    		 	//6. Set default values for coefficients
    	 	 	set_default_coefficients();
@@ -71,7 +72,7 @@ namespace getfem {
 			\param s_vec a vector of keywords to identify elements of f_vec, possible keywords: left, right, potential for a, p and v respectively.
 		*/
 		virtual void set_coefficients(const vector_function_type & f_vec, const vector_string_type & s_vec) = 0;
-		
+
 		//! Virtual method to assembly problem matrices and vectors.
 		virtual void assembly(void) = 0;
 
@@ -171,9 +172,10 @@ namespace getfem {
 
 		/*
 		+------------------------------------------------------+
-		| 5. Pure virtual auxiliary methods for init procedure |
+		| 5. Auxiliary methods for init procedure 			   |
 		+------------------------------------------------------+
 		*/
+		//5.1 Pure virtual methods for init procedures.
 		//! Method to import data from input file.
 		virtual void import_data(void) = 0;
 
@@ -183,15 +185,18 @@ namespace getfem {
 		//! Set Finite Element Method and Integration method.
 		virtual void set_im_and_fem(void) = 0;
 
-		//! Build other problem parameters (for example, radii).
-		virtual void build_param(void) = 0;
-
 		//! Set default values for known coefficients.
 		virtual void set_default_coefficients(void) = 0;
 
 		// Build the lists of the data of the vertices
 		// void build_vertices_lists(void);
 
+		//5.2 Auxiliary method to import data from .pts files.
+		//! Method to read .pts files
+		void import_pts_file(std::istream & ist, std::istream & rad, const bool & IMPORT_RADIUS);
+
+		//! da fare
+		bool check_boundary_conditions(void);
 		/*
 		+------------------------------------------------------+
 		| 6. Data structure for log data					   |
