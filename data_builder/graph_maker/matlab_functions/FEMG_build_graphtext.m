@@ -40,10 +40,7 @@ for i = 1:n-1
                     end
                 end
                 % Building the .txt
-                Finaltext(counter,   n       = number of ordered vertex of the graph
-% con_vectors = matrix of row vectors that say for each vertex to which
-%               ones is linked (with their numbers)
-:) = [ch(1), num2str(abs(points(i,1)),'%f'), ' ', ch(2), num2str(abs(points(i,2)),'%f'),...
+                Finaltext(counter,:) = [ch(1), num2str(abs(points(i,1)),'%f'), ' ', ch(2), num2str(abs(points(i,2)),'%f'),...
                     ' ', ch(3), num2str(abs(points(j,1)),'%f'), ' ', ch(4), num2str(abs(points(j,2)),'%f'), ...
                     ' ', BC(i,:), ' ', BC(j,:)];
             end            

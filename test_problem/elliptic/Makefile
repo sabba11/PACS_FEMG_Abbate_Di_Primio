@@ -1,33 +1,22 @@
 #Including Makefile.inc
+-include Makefile.inc
 -include ../../Makefile.inc
-#==============================================================================
-CXX = g++
-CXXFLAGS += -std=c++11
 
-INCLUDES += -I$(FEMG_DIR)/include
+#==============================================================================
 
 override CPPFLAGS := $(CPPFLAGS) $(INCLUDES) -DGMM_USES_LAPACK
 
-.PHONY = all clean distclean
+.PHONY: all $(ELLIPTIC_TEST)
 
-.DEFAULT_GOAL = all
+all: $(ELLIPTIC_TEST)
 
-all: main
+$(ELLIPTIC_TEST):
+	$(MAKE) -C $@  $(MAKECMDGOALS)
 
-main: main.o
-	@echo " "
-	@echo "--- Linking ---"
-	$(CXX) -o main main.o $(LDLIBS)
+resultclean:
+	rm -r -f $(RESULTS)
 
-main.o: main.cpp
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c main.cpp
+clean: $(ELLIPTIC_TEST)
 
-clean:
-	@echo " "
-	@echo "--- Cleaning eigen objects ---"
-	rm -f *.o
-
-distclean: clean
-	@echo " "
-	@echo "--- Cleaning eigen executable ---"
-	rm -f main
+distclean: $(ELLIPTIC_TEST)
+#resultclean

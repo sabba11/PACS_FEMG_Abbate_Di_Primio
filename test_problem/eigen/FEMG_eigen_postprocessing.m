@@ -15,17 +15,15 @@ clear all
 close all
 clc
 
-<<<<<<< HEAD
-path_to_files = 'graphene/export/Laplacian/1299 point-mesh/QZ'; % (!) path to eigenvectors/eigenvalues
-=======
-path_to_files = 'graphene/export/Laplacian/1299 point-mesh/QR'; % (!) path to eigenvectors/eigenvalues
->>>>>>> bd4f9c2b01fb434a7bb64c903e81055447905f6d
+
+path_to_files = 'star/export/1460 point-mesh/QZ'; % (!) path to eigenvectors/eigenvalues
+
 
 addpath('/usr/local/getfem_toolbox') % adds gf_* functions
 addpath(path_to_files) % adds path(s) to .U and mesh files
 
 %% 2. Loading eigenvalues and eigenvector files.
-
+3
 eigen_files = dir([path_to_files, '/*.U']);    % search for .U files
 N = length(eigen_files)-1;   % total number of eigenvector files 
 eigvals = zeros(N, 1); % vector to store eigenvalues
@@ -48,16 +46,14 @@ for i = 2 : N+1
 end
 fclose('all');
 
-<<<<<<< HEAD
 %% 3. Computing eigenvector oscillations
 
 FEMG_compute_oscillations(eigvects, mf, mesh) ;
 
 %% 4. Eigenvalue plots
-=======
-%% 3. Eigenvalue plot
+
 % Plots eigenvalues in ascending order.
->>>>>>> bd4f9c2b01fb434a7bb64c903e81055447905f6d
+
 
 figure()
 plot([1:N], eigvals, 'r-o', 'LineWidth', 0.1);
@@ -69,14 +65,11 @@ grid on
 %% 4. Eigenvector plots
 % Plots the first n_plots eigenvectors.
 
-n_plots = 3;
+n_plots = 10;
 for i = 1 : n_plots
     val = eigvals(i);
-<<<<<<< HEAD
+
     figure()
-    gf_plot(mf, eigvects(:, i)', 'zplot', 'on', 'mesh', 'on', 'title', ['Eigenvector associated to \lambda = ', num2str(val)]);
-    title(['Eigenvector associated to \lambda = ', num2str(val)]);
-=======
     gf_plot(mf, 10*eigvects(:, i)', 'zplot', 'on', 'mesh', 'on', 'title', ['Eigenvector associated to \lambda = ', num2str(val)], 'disp_options', 'off');
     title(['Eigenvector associated to \lambda = ', num2str(val)]);
     pbaspect([2 1 1]);
@@ -84,7 +77,7 @@ for i = 1 : n_plots
     ylabel('y');
     zlabel('Eigenvector');
     grid on
->>>>>>> bd4f9c2b01fb434a7bb64c903e81055447905f6d
+
     colorbar
 end
 
