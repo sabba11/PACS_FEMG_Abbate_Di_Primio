@@ -21,7 +21,6 @@
 
 // Project headers
 #include "elliptic_problem.hpp"
-#include "mesh_1d.hpp"
 
 
 namespace getfem {
@@ -43,20 +42,28 @@ namespace getfem {
 	void
 	elliptic_problem::build_mesh()
 	{
-	    #ifdef FEMG_VERBOSE_
+		#ifdef FEMG_VERBOSE_
 	    std::cout << "Importing the mesh for the graph..."<< std::endl;
 	    #endif
 
 	    std::ifstream ifs(descr.MESH_FILEG);
 	    GMM_ASSERT1(ifs.good(),"Unable to read from file " << descr.MESH_FILEG);
-      //ACHTUNG!: for the moment we don't give mesh step as an input parameter
+      	//ACHTUNG!: for the moment we don't give mesh step as an input parameter
 			// if we reimplement it back you should give it
-	    import_pts_file(ifs, meshg, BCg, n_origvert, dim_prob, tg_vectors, n_vertices, descr.MESH_TYPEG);
+		std::ifstream rad;
+		if (descr.IMPORT_RADIUS) {
+			rad.open(descr.RFILE);
+			GMM_ASSERT1(rad.good(), "Unable to read from file " << descr.RFILE);
+		}
+	    import_pts_file(ifs, rad, descr.IMPORT_RADIUS);
 
-	    n_branches = n_vertices.size();
+	    //n_branches = n_vertices.size();
   		n_totalvert = meshg.nb_points();
 
 	    ifs.close();
+		if (descr.IMPORT_RADIUS)
+			rad.close();
+		return;
 	}
 
 	void
@@ -83,27 +90,10 @@ namespace getfem {
 	}
 
 	void
-	elliptic_problem::build_param(void)
-	{
-	    #ifdef FEMG_VERBOSE_
-	    std::cout << "Building parameters for the problem..." << std::endl;
-	    #endif
-      	if (descr.IMPORT_RADIUS) {
-        	cout << "Importing radius values from file " << descr.RFILE << " ..." << endl;
-        	std::ifstream ist(descr.RFILE);
-        	if (!ist) cerr << "Impossible to read from file " << descr.RFILE << endl;
-        	import_network_radius(radii, n_branches, ist, meshg, tg_vectors);
-        	ist.close();
-      	}
-      return;
-	}
-
-
-	void
 	elliptic_problem::set_default_coefficients()
 	{
 		#ifdef FEMG_VERBOSE_
-		std::cout << "Setting coefficients at default values..."
+		std::cout << "Setting coefficients at default values..." << std::endl;
 		#endif
 		weights = vector_type(n_totalvert, 1.0);
 		potential = vector_type(n_totalvert, 0.0);
@@ -319,6 +309,7 @@ namespace getfem {
 		std::cout << "[elliptic_problem] Assembling matrices..." << std::endl;
 		#endif
 
+		assembly_source();
 		assembly_matL();
 		assembly_matA();
 
@@ -347,6 +338,28 @@ namespace getfem {
 		getfem::asm_mass_matrix_param(V, mimg, mf_Ug, mf_coeffg, potential);
 		A.resize(n_totalvert, n_totalvert);
 		gmm::add(L, V, A);
+		vector_type R_dir(n_totalvert, 0);
+		for (unsigned i = 0; i < BCg.size(); i++)
+			if (BCg[i].label == "DIR")
+				R_dir[BCg[i].idx] = BCg[i].value;
+		getfem::assembling_Dirichlet_condition(A, F_source, mf_Ug, n_branches + 2, R_dir);
+		return;
+	}
+
+	void
+	elliptic_problem::assembly_source()
+	{
+		vector_type B(n_totalvert);
+		getfem::asm_source_term(B, mimg, mf_Ug, mf_coeffg, F_source);
+		vector_type B_neu(n_totalvert);
+		vector_type BC_neu(n_totalvert);
+		for (unsigned i = 0; i < BCg.size(); i++)
+			if (BCg[i].label == "NEU")
+				BC_neu[BCg[i].idx] = BCg[i].value;
+		getfem::asm_source_term(B_neu, mimg, mf_Ug, mf_coeffg, BC_neu, n_branches+1);
+		for (unsigned i = 0; i < B.size(); i++) {
+			F_source[i] = B[i] + B_neu[i];
+		}
 		return;
 	}
 

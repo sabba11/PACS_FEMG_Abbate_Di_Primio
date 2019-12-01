@@ -93,7 +93,7 @@ namespace getfem {
 
 		//! Potential matrix.
 		sparse_matrix_type V;
-		
+
 		//! Source term at rhs of the differential problem.
 		vector_type F_source;
 
@@ -135,9 +135,6 @@ namespace getfem {
 		//! Overridden method to set Finite Element Method and Integration method.
 		virtual void set_im_and_fem(void) override;
 
-		//! Overridden method to build other problem parameters (for example, radii).
-		virtual void build_param(void) override;
-
 		//! Overridden method to set default values for known coefficients.
 		virtual void set_default_coefficients(void) override;
 
@@ -159,6 +156,9 @@ namespace getfem {
 
 		//! Auxiliary method to assembly the Laplace matrix.
 		void assembly_matL(void);
+
+		//! Auxiliary method to assembly the source term.
+		void assembly_source(void);
 	};
 } //end of namespace
 #endif
