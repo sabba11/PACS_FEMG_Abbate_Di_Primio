@@ -21,7 +21,6 @@
 
 // Project headers
 #include "eigen_problem.hpp"
-#include "mesh_1d.hpp"
 
 extern "C" {void dggev_( char* jobvl, char* jobvr, long unsigned int* na, double* a, long unsigned int* nb, double* b,
                          long unsigned int* lda, double* wr, double* wi, double* wd, double* vl, long unsigned int* ldvl,
@@ -55,14 +54,22 @@ namespace getfem {
 
 	    std::ifstream ifs(descr.MESH_FILEG);
 	    GMM_ASSERT1(ifs.good(),"Unable to read from file " << descr.MESH_FILEG);
-      //ACHTUNG!: for the moment we don't give mesh step as an input parameter
+      	//ACHTUNG!: for the moment we don't give mesh step as an input parameter
 			// if we reimplement it back you should give it
-	    import_pts_file(ifs, meshg, BCg, n_origvert, dim_prob, tg_vectors, n_vertices, descr.MESH_TYPEG);
+		std::ifstream rad;
+		if (descr.IMPORT_RADIUS) {
+			rad.open(descr.RFILE);
+			GMM_ASSERT1(rad.good(), "Unable to read from file " << descr.RFILE);
+		}
+	    import_pts_file(ifs, rad, descr.IMPORT_RADIUS);
 
-	    n_branches = n_vertices.size();
+	    //n_branches = n_vertices.size();
   		n_totalvert = meshg.nb_points();
 
 	    ifs.close();
+		if (descr.IMPORT_RADIUS)
+			rad.close();
+		return;
 	}
 
 	void
@@ -86,22 +93,7 @@ namespace getfem {
 
 	    mf_Ug.set_finite_element(meshg.convex_index(), pf_Ug);
 	    mf_coeffg.set_finite_element(meshg.convex_index(), pf_coeffg);
-	}
-
-	void
-	eigen_problem::build_param(void)
-	{
-	    #ifdef FEMG_VERBOSE_
-	    std::cout << "Building parameters for the problem..." << std::endl;
-	    #endif
-      	if (descr.IMPORT_RADIUS) {
-        	cout << "Importing radius values from file " << descr.RFILE << " ..." << endl;
-        	std::ifstream ist(descr.RFILE);
-        	if (!ist) cerr << "Impossible to read from file " << descr.RFILE << endl;
-        	import_network_radius(radii, n_branches, ist, meshg, tg_vectors);
-        	ist.close();
-      	}
-      return;
+		return;
 	}
 
 	void
@@ -123,7 +115,7 @@ namespace getfem {
 	GMM_ASSERT1((f_vec.size() == s_vec.size()) && (f_vec.size() <= 3) && (!f_vec.empty()), "Input data has invalid size.");
 	for (unsigned i = 0; i < f_vec.size(); i++) {
 		vector_size_type weight_den(n_totalvert, 0);
-	  vector_type weight(n_totalvert, 0.0);
+	  	vector_type weight(n_totalvert, 0.0);
 		std::set<unsigned> branch_idx;
 		unsigned k = 0; //aux counter
 		unsigned thresh = n_totalvert - n_origvert; //distinguish between idxs of real vertices and nodes
@@ -173,20 +165,20 @@ namespace getfem {
 	void
 	eigen_problem::set_coefficients(const vector_function_type & f_vec, const vector_string_type & s_vec)
 	{
-	GMM_ASSERT1((f_vec.size() == s_vec.size()) && (f_vec.size() <= 3) && (!f_vec.empty()), "Input data has invalid size.");
-	for (unsigned i = 0; i < f_vec.size(); i++) {
-	  vector_type weight(n_totalvert);
-		  for (unsigned i = 0; i < meshg.points().size(); i++)
-		 	weight[i] = f_vec[i](meshg.points()[i]);
-		  GMM_ASSERT1(s_vec[i] == "left" || s_vec[i] == "right" || s_vec[i] == "potential", "Invalid string input data.");
-		  if (s_vec[i] == "left")
-			  weight.swap(left_weights);
-		  else if (s_vec[i] == "right")
-			  weight.swap(right_weights);
-		  else if (s_vec[i] == "potential")
-			  weight.swap(potential);
-	}
-	return;
+		GMM_ASSERT1((f_vec.size() == s_vec.size()) && (f_vec.size() <= 3) && (!f_vec.empty()), "Input data has invalid size.");
+		for (unsigned i = 0; i < f_vec.size(); i++) {
+			vector_type weight(n_totalvert);
+			for (unsigned j = 0; j < meshg.points().size(); j++)
+				weight[j] = f_vec[i](meshg.points()[j]);
+		 	GMM_ASSERT1(s_vec[i] == "left" || s_vec[i] == "right" || s_vec[i] == "potential", "Invalid string input data.");
+		 	if (s_vec[i] == "left")
+				weight.swap(left_weights);
+		  	else if (s_vec[i] == "right")
+				weight.swap(right_weights);
+		  	else if (s_vec[i] == "potential")
+				weight.swap(potential);
+		}
+		return;
 	}
 
 	scalar_type
@@ -324,7 +316,12 @@ namespace getfem {
 		getfem::asm_mass_matrix_param(V, mimg, mf_Ug, mf_coeffg, potential);
 		A.resize(n_totalvert, n_totalvert);
 		gmm::add(L, V, A);
-
+		vector_type R_dir(n_totalvert, 0);
+		vector_type zeros(n_totalvert, 0);
+		for (unsigned i = 0; i < BCg.size(); i++)
+			if (BCg[i].label == "DIR")
+				R_dir[BCg[i].idx] = BCg[i].value;
+		getfem::assembling_Dirichlet_condition(A, zeros, mf_Ug, n_branches + 1, R_dir);
 		return;
 	}
 
