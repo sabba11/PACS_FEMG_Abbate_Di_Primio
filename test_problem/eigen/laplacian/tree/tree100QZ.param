@@ -42,4 +42,4 @@ MAX_ITER  = 1000;
 % Boolean
 IMPORT_RADIUS = 1;
 % Path of the file containing the radii
-RFILE = '../../../data_builder/data/cradii_tree.pts'
+RFILE = '../../../data_builder/data/cradii_tree.txt'
