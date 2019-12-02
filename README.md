@@ -40,6 +40,6 @@ every time the project is compiled from a new terminal session. To modify the va
 and add the `export` command above (without the initial `$` sign) as the last line of the file.
 
 ## Execution and postprocessing
-For details on how to execute the code and postprocess the results, refer to the README.md in the test_problems folder.
+For details on how to execute the code and postprocess the results, refer to the `README.md` in the `test_problem` folder.
 
 
