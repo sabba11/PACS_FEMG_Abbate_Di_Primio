@@ -277,8 +277,6 @@ namespace getfem {
 	void
 	quantum_graph_problem::check_boundary_conditions(void) const
 	{
-		for (unsigned i = 0; i < BCg.size(); i++)
-			std::cout << BCg[i] << std::endl;
 		for (unsigned i = 0; i < BCg.size()-1; i++)
 			for (unsigned j = i + 1; j < BCg.size(); j++)
 				if (BCg[i].idx == BCg[j].idx)
