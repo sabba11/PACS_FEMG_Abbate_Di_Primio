@@ -47,7 +47,6 @@ namespace getfem {
 			std::cout << " TOLERANCE                 : " << TOL << std::endl;
 		if (COMP_METHOD != "LU" && BY_ITERATION)
 			std::cout << " ITERATIONS                 : " << ITER << std::endl;
-		std::cout << "--------------------------------------------------" << std::endl;
 		return;
 	}
 

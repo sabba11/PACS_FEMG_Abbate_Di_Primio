@@ -40,7 +40,7 @@ namespace getfem {
 	eigen_problem::import_data()
 	{
 	    #ifdef FEMG_VERBOSE_
-	    std::cout << "Importing descriptors for the problem..."<< std::endl;
+	    std::cout << "[eigen_problem] Importing problem descriptors..." << std::endl;
 	    #endif
 
 	    descr.import_all(INPUT);
@@ -54,7 +54,7 @@ namespace getfem {
 	eigen_problem::build_mesh()
 	{
 	    #ifdef FEMG_VERBOSE_
-	    std::cout << "Importing the mesh for the graph..."<< std::endl;
+	    std::cout << "[eigen_problem] Importing mesh from data file..." << std::endl;
 	    #endif
 
 	    std::ifstream ifs(descr.MESH_FILEG);
@@ -63,12 +63,15 @@ namespace getfem {
 			// if we reimplement it back you should give it
 		std::ifstream rad;
 		if (descr.IMPORT_RADIUS) {
+			#ifdef FEMG_VERBOSE_
+			std::cout << "[eigen_problem] Importing radii from data file... " << std::endl;
+			#endif
+
 			rad.open(descr.RFILE);
 			GMM_ASSERT1(rad.good(), "Unable to read from file " << descr.RFILE);
 		}
 	    import_pts_file(ifs, rad, descr.IMPORT_RADIUS);
 
-	    //n_branches = n_vertices.size();
   		n_totalvert = meshg.nb_points();
 
 	    ifs.close();
@@ -80,15 +83,15 @@ namespace getfem {
 	void
 	eigen_problem::set_im_and_fem()
 	{
-	    #ifdef FEMG_VERBOSE_
-	    std::cout << "Setting Integration Methods for the discrete problem..."<< std::endl;
+		#ifdef FEMG_VERBOSE_
+	    std::cout << "[eigen_problem] Setting GetFEM++ integration method..."<< std::endl;
 	    #endif
 
 	    pintegration_method pim_g = int_method_descriptor(descr.IM_TYPEG);
 	    mimg.set_integration_method(meshg.convex_index(), pim_g);
 
 	    #ifdef FEMG_VERBOSE_
-	    std::cout << "Setting Finite Element Methods for the discrete problem..."<< std::endl;
+	    std::cout << "[eigen_problem] Setting GetFEM++ Finite Element method..." << std::endl;
 	    #endif
 
 	    bgeot::pgeometric_trans pgt_g = bgeot::geometric_trans_descriptor(descr.MESH_TYPEG);
@@ -105,8 +108,9 @@ namespace getfem {
 	eigen_problem::set_default_coefficients(void)
 	{
 		#ifdef FEMG_VERBOSE_
-		std::cout << "Setting coefficients at default values..." << std::endl;
+		std::cout << "[eigen_problem] Setting coefficients at default values..." << std::endl;
 		#endif
+
 		left_weights = vector_type(n_totalvert, 1.0);
 		right_weights = vector_type(n_totalvert, 1.0);
 		potential = vector_type(n_totalvert, 0.0);
@@ -117,59 +121,63 @@ namespace getfem {
 	void
 	eigen_problem::set_coefficients(const vector_function_type & f_vec, const vector_string_type & s_vec, const unsigned & n_mean_points)
 	{
-	GMM_ASSERT1((f_vec.size() == s_vec.size()) && (f_vec.size() <= 3) && (!f_vec.empty()), "Input data has invalid size.");
-	for (unsigned i = 0; i < f_vec.size(); i++) {
-		vector_size_type weight_den(n_totalvert, 0);
-	  	vector_type weight(n_totalvert, 0.0);
-		std::set<unsigned> branch_idx;
-		unsigned k = 0; //aux counter
-		unsigned thresh = n_totalvert - n_origvert; //distinguish between idxs of real vertices and nodes
-		for (size_type b=0; b<n_branches; ++b) {
-			for (getfem::mr_visitor mrv(meshg.region(b)); !mrv.finished(); ++mrv) {
+		#ifdef FEMG_VERBOSE_
+		std::cout << "[eigen_problem] Computing coefficients on mesh nodes (via means)..." << std::endl;
+		#endif
+
+		GMM_ASSERT1((f_vec.size() == s_vec.size()) && (f_vec.size() <= 3) && (!f_vec.empty()), "Input data has invalid size.");
+		for (unsigned i = 0; i < f_vec.size(); i++) {
+			vector_size_type weight_den(n_totalvert, 0);
+	  		vector_type weight(n_totalvert, 0.0);
+			std::set<unsigned> branch_idx;
+			unsigned k = 0; //aux counter
+			unsigned thresh = n_totalvert - n_origvert; //distinguish between idxs of real vertices and nodes
+			for (size_type b=0; b<n_branches; ++b) {
+				for (getfem::mr_visitor mrv(meshg.region(b)); !mrv.finished(); ++mrv) {
+					unsigned idx = mrv.cv(); //get convex index
+					vector_size_type pts = meshg.ind_points_of_convex(idx); //get point indexes of convex idx
+					for (size_type m = 0; m < pts.size(); m++)
+						branch_idx.insert(pts[m]); //collect in set to eliminate duplicates
+				}
+				for (auto it = branch_idx.begin(); it != branch_idx.end(); it++) {
+					weight_den[*it]++; //update the counter of ith point
+					weight[*it] += compute_circular_mean(n_mean_points, radii[k], meshg.points()[*it], tg_vectors[k], f_vec[i]); //update value
+					k++; //update the aux counter
+				}
+				branch_idx.clear(); //clear the set
+			}
+			// Check last region with real vertices
+			for (getfem::mr_visitor mrv(meshg.region(n_branches)); !mrv.finished(); ++mrv) {
 				unsigned idx = mrv.cv(); //get convex index
 				vector_size_type pts = meshg.ind_points_of_convex(idx); //get point indexes of convex idx
-				for (size_type m = 0; m < pts.size(); m++)
-					branch_idx.insert(pts[m]); //collect in set to eliminate duplicates
+				for (size_type m = 0; m < pts.size(); m++) {
+					if (pts[m] >= thresh) {
+						weight_den[pts[m]]++; //update counter
+						weight[pts[m]] += compute_circular_mean(n_mean_points, radii[k], meshg.points()[pts[m]], tg_vectors[k], f_vec[i]); //update value
+						k++; //update counter
+					}// if real point
+				}
 			}
-			for (auto it = branch_idx.begin(); it != branch_idx.end(); it++) {
-				weight_den[*it]++; //update the counter of ith point
-				weight[*it] += compute_circular_mean(n_mean_points, radii[k], meshg.points()[*it], tg_vectors[k], f_vec[i]); //update value
-				k++; //update the aux counter
-			}
-			branch_idx.clear(); //clear the set
+			for (size_type n = 0; n < n_totalvert; n++)
+				weight[n] = weight[n]/weight_den[n]; //all points will be counted at least once so weight_den cannot be 0
+			GMM_ASSERT1(s_vec[i] == "left" || s_vec[i] == "right" || s_vec[i] == "potential", "Invalid string input data.");
+			if (s_vec[i] == "left")
+				weight.swap(left_weights);
+			else if (s_vec[i] == "right")
+				weight.swap(right_weights);
+			else if (s_vec[i] == "potential")
+				weight.swap(potential);
 		}
-		// Check last region with real vertices
-		for (getfem::mr_visitor mrv(meshg.region(n_branches)); !mrv.finished(); ++mrv) {
-			unsigned idx = mrv.cv(); //get convex index
-			vector_size_type pts = meshg.ind_points_of_convex(idx); //get point indexes of convex idx
-			for (size_type m = 0; m < pts.size(); m++) {
-				if (pts[m] >= thresh) {
-					weight_den[pts[m]]++; //update counter
-					weight[pts[m]] += compute_circular_mean(n_mean_points, radii[k], meshg.points()[pts[m]], tg_vectors[k], f_vec[i]); //update value
-					k++; //update counter
-				}// if real point
-			}
-		}
-		for (size_type n = 0; n < n_totalvert; n++)
-			weight[n] = weight[n]/weight_den[n]; //all points will be counted at least once so weight_den cannot be 0
-		GMM_ASSERT1(s_vec[i] == "left" || s_vec[i] == "right" || s_vec[i] == "potential", "Invalid string input data.");
-		std::cout << "weights vector" << std::endl;
-		for (unsigned l = 0; l < weight.size(); l++) {
-			std::cout << weight[l] << " " << weight_den[l] << std::endl;
-		}
-		if (s_vec[i] == "left")
-			weight.swap(left_weights);
-		else if (s_vec[i] == "right")
-			weight.swap(right_weights);
-		else if (s_vec[i] == "potential")
-			weight.swap(potential);
-	}
-	return;
+		return;
 	}
 
 	void
 	eigen_problem::set_coefficients(const vector_function_type & f_vec, const vector_string_type & s_vec)
 	{
+		#ifdef FEMG_VERBOSE_
+		std::cout << "[eigen_problem] Computing coefficients on mesh nodes (via direct evaluation)..." << std::endl;
+		#endif
+
 		GMM_ASSERT1((f_vec.size() == s_vec.size()) && (f_vec.size() <= 3) && (!f_vec.empty()), "Input data has invalid size.");
 		for (unsigned i = 0; i < f_vec.size(); i++) {
 			vector_type weight(n_totalvert);
@@ -187,85 +195,86 @@ namespace getfem {
 	}
 
 	scalar_type
-	eigen_problem::compute_circular_mean(
-	const unsigned & n_mean_points,
-	const scalar_type & radius,
-	const base_node & point,
-	const vector_type & tg_vector,
-	const function_type & f)
+	eigen_problem::compute_circular_mean
+		(
+		const unsigned & n_mean_points,
+		const scalar_type & radius,
+		const base_node & point,
+		const vector_type & tg_vector,
+		const function_type & f
+		)
 	{
-	std::vector<base_node> mean_points(n_mean_points);
-	for(size_type i=0; i<n_mean_points; i++){
-	  mean_points[i].resize(3);
-	  mean_points[i][0] = radius*cos(2*M_PI*i/n_mean_points);
-	  mean_points[i][1] = 0.0;
-	  mean_points[i][2] = radius*sin(2*M_PI*i/n_mean_points);
-	}
-	dense_matrix_type Rotx_1(3,3);
-	dense_matrix_type Rotx_2(3,3);
-	dense_matrix_type Rotz_1(3,3);
-	dense_matrix_type Rotz_2(3,3);
+		std::vector<base_node> mean_points(n_mean_points);
+		for (size_type i = 0; i < n_mean_points; i++){
+	  		mean_points[i].resize(3);
+	  		mean_points[i][0] = radius*cos(2*M_PI*i/n_mean_points);
+	  		mean_points[i][1] = 0.0;
+	  		mean_points[i][2] = radius*sin(2*M_PI*i/n_mean_points);
+		}
+		dense_matrix_type Rotx_1(3,3);
+		dense_matrix_type Rotx_2(3,3);
+		dense_matrix_type Rotz_1(3,3);
+		dense_matrix_type Rotz_2(3,3);
 
-	//indexes must start from 0!!
-	Rotx_1(0,0) = 1;
-	Rotx_1(0,1) = 0;
-	Rotx_1(0,2) = 0;
-	Rotx_1(1,0) = 0;
-	Rotx_1(1,1) = sqrt(1-tg_vector[2]*tg_vector[2]);
-	Rotx_1(1,2) = -tg_vector[2];
-	Rotx_1(2,0) = 0;
-	Rotx_1(2,1) = tg_vector[2];
-	Rotx_1(2,2) = sqrt(1-tg_vector[2]*tg_vector[2]);
+		Rotx_1(0,0) = 1;
+		Rotx_1(0,1) = 0;
+		Rotx_1(0,2) = 0;
+		Rotx_1(1,0) = 0;
+		Rotx_1(1,1) = sqrt(1-tg_vector[2]*tg_vector[2]);
+		Rotx_1(1,2) = -tg_vector[2];
+		Rotx_1(2,0) = 0;
+		Rotx_1(2,1) = tg_vector[2];
+		Rotx_1(2,2) = sqrt(1-tg_vector[2]*tg_vector[2]);
 
-	Rotx_2(0,0) = 1;
-	Rotx_2(0,1) = 0;
-	Rotx_2(0,2) = 0;
-	Rotx_2(1,0) = 0;
-	Rotx_2(1,1) = -sqrt(1-tg_vector[2]*tg_vector[2]);
-	Rotx_2(1,2) = -tg_vector[2];
-	Rotx_2(2,0) = 0;
-	Rotx_2(2,1) = tg_vector[2];
-	Rotx_2(2,2) = -sqrt(1-tg_vector[2]*tg_vector[2]);
+		Rotx_2(0,0) = 1;
+		Rotx_2(0,1) = 0;
+		Rotx_2(0,2) = 0;
+		Rotx_2(1,0) = 0;
+		Rotx_2(1,1) = -sqrt(1-tg_vector[2]*tg_vector[2]);
+		Rotx_2(1,2) = -tg_vector[2];
+		Rotx_2(2,0) = 0;
+		Rotx_2(2,1) = tg_vector[2];
+		Rotx_2(2,2) = -sqrt(1-tg_vector[2]*tg_vector[2]);
 
-	Rotz_1(0,0) = sqrt(1-tg_vector[0]*tg_vector[0]);
-	Rotz_1(0,1) = -tg_vector[0];
-	Rotz_1(0,2) = 0;
-	Rotz_1(1,0) = tg_vector[0];
-	Rotz_1(1,1) = sqrt(1-tg_vector[0]*tg_vector[0]);
-	Rotz_1(1,2) = 0;
-	Rotz_1(2,0) = 0;
-	Rotz_1(2,1) = 0;
-	Rotz_1(2,2) = 1;
+		Rotz_1(0,0) = sqrt(1-tg_vector[0]*tg_vector[0]);
+		Rotz_1(0,1) = -tg_vector[0];
+		Rotz_1(0,2) = 0;
+		Rotz_1(1,0) = tg_vector[0];
+		Rotz_1(1,1) = sqrt(1-tg_vector[0]*tg_vector[0]);
+		Rotz_1(1,2) = 0;
+		Rotz_1(2,0) = 0;
+		Rotz_1(2,1) = 0;
+		Rotz_1(2,2) = 1;
 
-	Rotz_2(0,0) = -sqrt(1-tg_vector[0]*tg_vector[0]);
-	Rotz_2(0,1) = -tg_vector[0];
-	Rotz_2(0,2) = 0;
-	Rotz_2(1,0) = tg_vector[0];
-	Rotz_2(1,1) = -sqrt(1-tg_vector[0]*tg_vector[0]);
-	Rotz_2(1,2) = 0;
-	Rotz_2(2,0) = 0;
-	Rotz_2(2,1) = 0;
-	Rotz_2(2,2) = 1;
-	vector_type v,w;
-	v.resize(3); w.resize(3);
-	for(size_type i=0; i<n_mean_points; i++){
-	  v[0] = mean_points[i][0]; v[1] = mean_points[i][1]; v[2] = mean_points[i][2];
-	  if (tg_vector[1]>0){
-	    gmm::mult(Rotx_1,v,w);
-	    gmm::mult(Rotz_1,w,v);
-	  }
-	  else{
-	    gmm::mult(Rotx_2,v,w);
-	    gmm::mult(Rotz_2,w,v);
-	  }
-	  mean_points[i][0] = v[0] + point[0]; mean_points[i][1] =  v[1] + point[1]; mean_points[i][2] = v[2] + point[2];
-	}
-	scalar_type mean = 0.0;
-	for(size_type i=0; i<n_mean_points; i++){
-	  mean += f(mean_points[i]);
-	}
-	mean = mean/n_mean_points;
-	return mean;
+		Rotz_2(0,0) = -sqrt(1-tg_vector[0]*tg_vector[0]);
+		Rotz_2(0,1) = -tg_vector[0];
+		Rotz_2(0,2) = 0;
+		Rotz_2(1,0) = tg_vector[0];
+		Rotz_2(1,1) = -sqrt(1-tg_vector[0]*tg_vector[0]);
+		Rotz_2(1,2) = 0;
+		Rotz_2(2,0) = 0;
+		Rotz_2(2,1) = 0;
+		Rotz_2(2,2) = 1;
+		vector_type v,w;
+		v.resize(3); w.resize(3);
+		for (size_type i = 0; i < n_mean_points; i++){
+			v[0] = mean_points[i][0]; v[1] = mean_points[i][1]; v[2] = mean_points[i][2];
+		  	if (tg_vector[1]>0) {
+		    	gmm::mult(Rotx_1,v,w);
+		    	gmm::mult(Rotz_1,w,v);
+		  	}
+		  	else {
+		    gmm::mult(Rotx_2,v,w);
+		    gmm::mult(Rotz_2,w,v);
+		  	}
+		  	mean_points[i][0] = v[0] + point[0]; mean_points[i][1] =  v[1] + point[1]; mean_points[i][2] = v[2] + point[2];
+		}
+		scalar_type mean = 0.0;
+		for (size_type i = 0; i < n_mean_points; i++){
+		  	mean += f(mean_points[i]);
+		}
+		mean = mean/n_mean_points;
+		return mean;
 	}
 
 	void
@@ -321,12 +330,12 @@ namespace getfem {
 		getfem::asm_mass_matrix_param(V, mimg, mf_Ug, mf_coeffg, potential);
 		A.resize(n_totalvert, n_totalvert);
 		gmm::add(L, V, A);
-		vector_type R_dir(n_totalvert, 0);
-		vector_type zeros(n_totalvert, 0);
-		for (unsigned i = 0; i < BCg.size(); i++)
-			if (BCg[i].label == "DIR")
-				R_dir[BCg[i].idx] = BCg[i].value;
-		getfem::assembling_Dirichlet_condition(A, zeros	, mf_Ug, n_branches + 2, R_dir);
+		//vector_type R_dir(n_totalvert, 0);
+		//vector_type zeros(n_totalvert, 0);
+		//for (unsigned i = 0; i < BCg.size(); i++)
+		//	if (BCg[i].label == "DIR")
+		//		R_dir[BCg[i].idx] = BCg[i].value;
+		//getfem::assembling_Dirichlet_condition(A, zeros	, mf_Ug, n_branches + 2, R_dir);
 		return;
 	}
 
@@ -449,6 +458,7 @@ namespace getfem {
 		}
 		else {
 			std::cout << "[eigen_problem] Invalid computational method descriptor." << std::endl;
+			return false;
 		}
 		return true;
 	}

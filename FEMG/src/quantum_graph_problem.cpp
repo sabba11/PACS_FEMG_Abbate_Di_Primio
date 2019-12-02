@@ -9,7 +9,9 @@
 
 namespace getfem {
 
-	void quantum_graph_problem::import_pts_file(std::istream & ist, std::istream & rad, const bool & IMPORT_RADIUS) {
+	void
+	quantum_graph_problem::import_pts_file(std::istream & ist, std::istream & rad, const bool & IMPORT_RADIUS)
+	{
 		n_branches = 0; // nb of branches
 		vector_type Rdata; // data structure to read radii
 		size_type nb_branches = 0; // check number of radii is correct
@@ -272,7 +274,9 @@ namespace getfem {
 		return;
 	}
 
-	void quantum_graph_problem::check_boundary_conditions(void) const {
+	void
+	quantum_graph_problem::check_boundary_conditions(void) const
+	{
 		for (unsigned i = 0; i < BCg.size(); i++)
 			std::cout << BCg[i] << std::endl;
 		for (unsigned i = 0; i < BCg.size()-1; i++)
