@@ -10,7 +10,7 @@ OUTPUT = 'scale_free/';
 %  MESH
 %===================================
 % Path to import the 1d list of points
-MESH_FILEG = '../../data_builder/data/scale_free_N.pts'
+MESH_FILEG = '../../../data_builder/data/scale_free_N.pts'
 %===================================
 %  GETFEM DESCRIPTORS
 %===================================
@@ -42,4 +42,4 @@ MAX_ITER  = 1000;
 % Boolean
 IMPORT_RADIUS = 1;
 % Path of the file containing the radii
-RFILE = '../../data_builder/data/cradii_scale_free.pts'
+RFILE = '../../../data_builder/data/cradii_scale_free.pts'

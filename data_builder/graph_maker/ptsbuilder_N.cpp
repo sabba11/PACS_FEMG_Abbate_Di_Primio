@@ -1,18 +1,36 @@
+/*!
+	\file ptsbuilder_N.cpp
+	\author Stefano Abbate
+	\author Andrea Di Primio
+	\brief File used to build the meshed graph *.pts with a number N of sub-edges for each edge.
+*/
+
+//Standard libraries
 #include <iostream>
 #include <string>
 #include <vector>
 #include <fstream>
 #include <cstddef>
 
-
+//BGLgeom libraries
 #include <boost/graph/adjacency_list.hpp>
 #include <writer_pts.hpp>
 #include <reader_femg.hpp>
 #include <graph_builder.hpp>
 #include <graph_access.hpp>
 
-using namespace femg;
+using namespace getfem;
 using namespace BGLgeom;
+
+//! Main function.
+/*!
+  This function takes three input parameters in the command line:
+  - The number N of sub-edges to be made.
+  - The *.txt containing a matrix with the edges informations.
+    Respectively starting, ending points coordinates and then their BCs.
+  - The address and name at which the user wants to save the file.
+    Use *.pts format.
+*/
 
 int main( int argc, char* argv[] ) {
   //Check if number of args is correct
@@ -21,13 +39,13 @@ int main( int argc, char* argv[] ) {
   //Discretization parameter N
   const int N = std::stoi(argv[1]);
   const unsigned int num_BC = 1;
-
   //Checking .txt point dimension
   std::fstream ost_check{argv[2]};
   double coord_check;
   unsigned counter = 0;
   while (ost_check>>coord_check)
     counter++;
+  // 2 dim
   if (counter == 4){
     const unsigned int dim = 2;
     //Type-aliases
@@ -43,13 +61,11 @@ int main( int argc, char* argv[] ) {
     while (!reader.is_eof()) {
       Vertex_base_property<dim,num_BC> source;
       Vertex_base_property<dim,num_BC> target;
-      //Edge_base_property<linear_geometry<3>, 3> edge;
       Edge_desc<Graph> e;
       Vertex_desc<Graph> s,d;
       reader.get_data();
       source = reader.get_source_data(); //acquiring data...
       target = reader.get_target_data();
-      //edge = reader.get_edge_data();
       s = new_vertex(source, G, check);
       d = new_vertex(target, G, check); //modifying the graph
       e = new_linear_edge(s, d, G);
@@ -62,9 +78,8 @@ int main( int argc, char* argv[] ) {
     std::string out_filename = argv[3];
     writer_pts<Graph, dim, num_BC> W(out_filename);
     W.export_pts(G);
-
     std::ifstream ist{out_filename};
-
+  // 3 dim
   }else if (counter == 6){
     const unsigned int dim3 = 3;
     //Type-aliases
@@ -99,11 +114,8 @@ int main( int argc, char* argv[] ) {
     std::string out_filename = argv[3];
     writer_pts<Graph3, dim3, num_BC> W(out_filename);
     W.export_pts(G);
-
     std::ifstream ist{out_filename};
-
   }else
     std::cerr << "Error: invalid input arguments." << std::endl;
-
 return 0;
 };

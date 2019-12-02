@@ -12,7 +12,7 @@ clear all
 
 % Adding needed function (FEMG & Contest) and output directory
 addpath('./matlab_functions')
-out_filename = '../data/scale_free100.txt';
+out_filename = '../data/scale_free20.txt';
 
 % Dimension (comment the unwanted one)
 ndim = 2;
@@ -26,7 +26,7 @@ x = 4;
 y = 4;
 
 % Number of vertices required (even)
-N = 100;
+N = 20;
 
 % Building geometrical points of the graph
 points = zeros(N,2);

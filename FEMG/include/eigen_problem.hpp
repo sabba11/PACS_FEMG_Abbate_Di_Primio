@@ -66,7 +66,7 @@ namespace getfem {
 	private:
 		/*
 		+------------------------------------------------------+
-		| 1. Descriptors struct 							   |
+		| 1. Descriptors struct 						              	   |
 		+------------------------------------------------------+
 		*/
 		//! Struct to contain all descriptors.
@@ -100,7 +100,7 @@ namespace getfem {
 
 		/*
 		+------------------------------------------------------+
-		| 3. Auxiliary methods								   |
+		| 3. Auxiliary methods				              				   |
 		+------------------------------------------------------+
 		*/
 		// 3.1 Auxiliary methods for init procedure

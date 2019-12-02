@@ -19,7 +19,7 @@ help:
 	@echo "make clean: ------ Cleans all object files"
 	@echo "make distclean: -- Cleans all"
 
-all: graph_maker library eigen elliptic
+all: graph_maker library eigen elliptic doc clean
 
 library:
 	@echo " "
@@ -45,6 +45,14 @@ graph_maker:
 	$(MAKE) -C data_builder/graph_maker all
 	@echo "--- COMPLETED ---"
 
+doc:
+	@echo ""
+	@echo "--- Making documentation ---"
+	@mkdir -p $(DOC_PATH)
+	doxygen Doxyfile
+	$(MAKE) -C $(DOC_PATH)/latex
+	@echo "--- COMPLETED ---"
+
 resultclean:
 	$(MAKE) -C test_problem/elliptic resultclean
 	$(MAKE) -C test_problem/eigen resultclean
@@ -59,3 +67,4 @@ distclean:
 	$(MAKE) -C test_problem/eigen distclean
 	$(MAKE) -C $(FEMG_DIR) distclean
 	$(MAKE) -C data_builder/graph_maker distclean
+	-rm -rv $(DOC_PATH) $(INSTALL_PATH) 

@@ -4,6 +4,9 @@ PROJECT_DIR = /home/sguillo/Documents/PACS_FEMG_Abbate_Di_Primio
 # Installation path  
 INSTALL_PATH = $(PROJECT_DIR)/install
 
+# Documentation path  
+DOC_PATH = $(PROJECT_DIR)/doc
+
 # The place where we do find the files that let us install the library
 FEMG_DIR = $(PROJECT_DIR)/FEMG
 
