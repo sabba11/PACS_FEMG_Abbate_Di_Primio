@@ -1,3 +1,10 @@
+/*!
+	\file elliptic_problem.hpp
+	\author Stefano Abbate
+	\author Andrea Di Primio
+	\brief Header containing the elliptic_problem derived class.
+*/
+
 #ifndef FEMG_ELLIPTIC_PROBLEM_HPP
 #define FEMG_ELLIPTIC_PROBLEM_HPP
 

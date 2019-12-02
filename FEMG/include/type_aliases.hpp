@@ -1,4 +1,9 @@
-// Header with custom aliases.
+/*!
+	\file type_aliases.hpp
+	\author Stefano Abbate
+	\author Andrea Di Primio
+	\brief Header containing custom type aliases.
+*/
 
 #ifndef FEMG_TYPE_ALIASES_HPP
 #define FEMG_TYPE_ALIASES_HPP

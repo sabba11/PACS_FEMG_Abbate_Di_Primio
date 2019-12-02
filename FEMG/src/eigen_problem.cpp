@@ -1,4 +1,9 @@
-// Source file containing definitions for class eigen_problem.
+/*!
+	\file eigen_problem.cpp
+	\author Stefano Abbate
+	\author Andrea Di Primio
+	\brief Header containing the elliptic_problem derived class.
+*/
 
 // GetFEM++ libraries
 #include <getfem/getfem_assembling.h>
@@ -321,7 +326,7 @@ namespace getfem {
 		for (unsigned i = 0; i < BCg.size(); i++)
 			if (BCg[i].label == "DIR")
 				R_dir[BCg[i].idx] = BCg[i].value;
-		getfem::assembling_Dirichlet_condition(A, zeros, mf_Ug, n_branches + 1, R_dir);
+		getfem::assembling_Dirichlet_condition(A, zeros	, mf_Ug, n_branches + 2, R_dir);
 		return;
 	}
 

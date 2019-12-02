@@ -1,3 +1,10 @@
+/*!
+	\file elliptic_descr_qg.cpp
+	\author Stefano Abbate
+	\author Andrea Di Primio
+	\brief Source file containing definitions of methods from the elliptic_descr_qg derived class.
+*/
+
 #include "elliptic_descr_qg.hpp"
 
 namespace getfem {

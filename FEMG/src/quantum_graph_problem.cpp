@@ -1,6 +1,14 @@
+/*!
+	\file quantum_graph_problem.cpp
+	\author Stefano Abbate
+	\author Andrea Di Primio
+	\brief Source file containing definitions of methods from the quantum_graph_problem class.
+*/
+
 #include "quantum_graph_problem.hpp"
 
 namespace getfem {
+
 	void quantum_graph_problem::import_pts_file(std::istream & ist, std::istream & rad, const bool & IMPORT_RADIUS) {
 		n_branches = 0; // nb of branches
 		vector_type Rdata; // data structure to read radii
@@ -264,13 +272,13 @@ namespace getfem {
 		return;
 	}
 
-	bool quantum_graph_problem::check_boundary_conditions(void) {
+	void quantum_graph_problem::check_boundary_conditions(void) const {
 		for (unsigned i = 0; i < BCg.size(); i++)
 			std::cout << BCg[i] << std::endl;
 		for (unsigned i = 0; i < BCg.size()-1; i++)
 			for (unsigned j = i + 1; j < BCg.size(); j++)
 				if (BCg[i].idx == BCg[j].idx)
 					GMM_ASSERT1(BCg[i].label == BCg[j].label & BCg[i].value == BCg[j].value, "Incoherent boundary conditions. All BC data of the same node should be equal.");
-		return true;
+		return;
 	}
 }

@@ -1,3 +1,10 @@
+/*!
+	\file quantum_graph_problem.hpp
+	\author Stefano Abbate
+	\author Andrea Di Primio
+	\brief Header containing the core class to define a differential problem.
+*/
+
 #ifndef FEMG_QUANTUMGRAPHPROBLEM_HPP
 #define FEMG_QUANTUMGRAPHPROBLEM_HPP
 
@@ -49,17 +56,11 @@ namespace getfem {
    	     	//3. Build mesh for the graph
    	     	build_mesh();
 
-   	     	//4. Set finite elements and integration methods
+   	    	//4. Set finite elements and integration methods
    	     	set_im_and_fem();
 
-   	     	//5. Build problem parameters
-   	     	//build_param();
-
-   		 	//6. Set default values for coefficients
+   		 	//5. Set default values for coefficients
    	 	 	set_default_coefficients();
-
-   	     	//7. Build the lists of the data of the vertices
-   	     	// build_vertices_lists();
 
 			return;
 		}
@@ -188,15 +189,60 @@ namespace getfem {
 		//! Set default values for known coefficients.
 		virtual void set_default_coefficients(void) = 0;
 
-		// Build the lists of the data of the vertices
-		// void build_vertices_lists(void);
-
 		//5.2 Auxiliary method to import data from .pts files.
-		//! Method to read .pts files
+		//! Method to read .pts and .txt files containing mesh data.
+		/*!
+			The files are assumed to be in a very specific format.
+			In particular, the mesh data file read by the istream ist should have
+			the following form:
+				BEGIN_LIST
+				BEGIN_ARC
+				BC KEYWA [VALUE]
+				BC KEYWB [VALUE]
+					idx       x     	  y       		z			start
+					idx       x     	  y       		z			end
+					idx       x     	  y       		z			point
+					idx       x     	  y       		z			point
+					...
+				END_ARC
+				...
+				BEGIN_ARC
+				...
+				END_ARC
+				...
+				END_LIST
+			where:
+	  		1. The file always starts with BEGIN_LIST and ends with END_LIST.
+			2. Each arc is listed between the BEGIN_ARC and END_ARC keywords.
+			3. Every arc must contain (in order):
+				3a. Two lines of the kind BC KEY [VALUE] specifying boundary
+					conditions. KEY can be DIR (Dirichlet), NEU (Neumann) or
+					INT (Neumann-Kirchhoff). VALUE holds the value of the
+					boundary conditions. The first line relates to the "start"
+					node, whereas the second to the "end" node.
+					Boundary conditions coherence is checked at runtime.
+				3b. A list of points (each line represents a point) presenting
+					the index of the arc, the x,y and z coordinate (there can also
+					be only two coordinates) and a label ('start' for the starting point,
+					'end' for the end point, 'point' for a mesh node). Notice that
+					start and end points are respectively the first and second point
+					of the list. The mesh point order must be coherent with the
+					start and end point labels.
+			\param ist istream to read the mesh .pts file.
+			\param rad istream to read the radii txt file.
+			\bool IMPORT_RADIUS bool to estabilish whether or not radii should be read.
+		*/
 		void import_pts_file(std::istream & ist, std::istream & rad, const bool & IMPORT_RADIUS);
 
-		//! da fare
-		bool check_boundary_conditions(void);
+		//! Method to check that inserted boundary conditions are coherent.
+		/*!
+			The method checks that all BCs related to a specific vertex are coherent.
+			Indeed, one vertex can belong to many arcs (thus its BCs are specified
+			multiple times in the .pts file).
+			Throws a gmm++ error at runtime if unsuccessful.
+		*/
+		void check_boundary_conditions(void) const;
+
 		/*
 		+------------------------------------------------------+
 		| 6. Data structure for log data					   |

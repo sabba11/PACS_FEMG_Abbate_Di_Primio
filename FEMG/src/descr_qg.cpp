@@ -1,3 +1,10 @@
+/*!
+	\file descr_qg.cpp
+	\author Stefano Abbate
+	\author Andrea Di Primio
+	\brief Source file containing definitions of methods from the descr_qg class.
+*/
+
 #include "descr_qg.hpp"
 
 #include <iostream>

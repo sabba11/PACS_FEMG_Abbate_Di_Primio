@@ -1,3 +1,10 @@
+/*!
+	\file descr_qg.hpp
+	\author Stefano Abbate
+	\author Andrea Di Primio
+	\brief Header containing the descr_qg abstract class.
+*/
+
 #ifndef FEMG_DESCR_QG_HPP
 #define FEMG_DESCR_QG_HPP
 

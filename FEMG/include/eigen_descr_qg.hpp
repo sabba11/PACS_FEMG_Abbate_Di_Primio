@@ -1,3 +1,10 @@
+/*!
+	\file eigen_descr_qg.hpp
+	\author Stefano Abbate
+	\author Andrea Di Primio
+	\brief Header containing the eigen_descr_qg derived class.
+*/
+
 #ifndef FEMG_EIGEN_DESCR_QG_HPP
 #define FEMG_EIGEN_DESCR_QG_HPP
 

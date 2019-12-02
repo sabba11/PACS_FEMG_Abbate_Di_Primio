@@ -1,3 +1,10 @@
+/*!
+	\file eigen_descr_qg.cpp
+	\author Stefano Abbate
+	\author Andrea Di Primio
+	\brief Source file containing definitions of methods from the eigen_descr_qg derived class.
+*/
+
 #include "eigen_descr_qg.hpp"
 
 namespace getfem {

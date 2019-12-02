@@ -1,3 +1,10 @@
+/*!
+	\file elliptic_descr_qg.hpp
+	\author Stefano Abbate
+	\author Andrea Di Primio
+	\brief Header containing the elliptic_descr_qg derived class.
+*/
+
 #ifndef FEMG_ELLIPTIC_DESCR_QG_HPP
 #define FEMG_ELLIPTIC_DESCR_QG_HPP
 

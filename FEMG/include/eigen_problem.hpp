@@ -1,3 +1,10 @@
+/*!
+	\file eigen_problem.hpp
+	\author Stefano Abbate
+	\author Andrea Di Primio
+	\brief Header containing the eigen_problem derived class.
+*/
+
 #ifndef FEMG_EIGEN_PROBLEM_HPP
 #define FEMG_EIGEN_PROBLEM_HPP
 

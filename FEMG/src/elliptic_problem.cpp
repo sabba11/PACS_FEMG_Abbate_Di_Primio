@@ -1,4 +1,9 @@
-// Source file containing definitions for class eigen_problem.
+/*!
+	\file elliptic_problem.cpp
+	\author Stefano Abbate
+	\author Andrea Di Primio
+	\brief Source file containing definitions of methods from the elliptic_problem class.
+*/
 
 // GetFEM++ libraries
 #include <getfem/getfem_assembling.h>
