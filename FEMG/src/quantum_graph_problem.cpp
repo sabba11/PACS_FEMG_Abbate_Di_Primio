@@ -183,10 +183,11 @@ namespace getfem {
 			spoints.push_back(lpoints[2]); // first discretization node
 			size_type index_last = lpoints.size()-1;
 			spoints.push_back(lpoints[index_last]); // last discretization node
-
-			//Storing radii relative to real points
-			radii_aux.push_back(Rdata[n_branches-1]);
-			radii_aux.push_back(Rdata[n_branches-1]);
+			if (IMPORT_RADIUS){
+				//Storing radii relative to real points
+				radii_aux.push_back(Rdata[n_branches-1]);
+				radii_aux.push_back(Rdata[n_branches-1]);
+			}
 
 			//Updating boundary condition list
 			if ((bcflag>0) && (bcintI==0)){
@@ -219,8 +220,8 @@ namespace getfem {
 			} /* end of inner for */
 
 		} /* end of outer while (end of a branch) */
-
-		GMM_ASSERT1(nb_branches == n_branches, "Number of given radii is not equal to the number of branches!");
+		if(IMPORT_RADIUS)
+			GMM_ASSERT1(nb_branches == n_branches, "Number of given radii is not equal to the number of branches!");
 		//Indexes of additional regions to store BCs
 		size_type neumann_bc_region = n_branches + 1;
 		size_type dirichlet_bc_region = n_branches + 2;
@@ -255,7 +256,8 @@ namespace getfem {
 				v_tg[j] = v_tg[j]/norm;
 			}
 			tg_vectors.push_back(v_tg);
-			radii.push_back(radii_aux[i]);
+			if(IMPORT_RADIUS)
+				radii.push_back(radii_aux[i]);
 			//assigning boundary condition to the corresponding point
 			if (BC_check[i]>0) {
 				BCg[BC_check[i]-1].idx = ind[0];
