@@ -67,4 +67,4 @@ distclean:
 	$(MAKE) -C test_problem/eigen distclean
 	$(MAKE) -C $(FEMG_DIR) distclean
 	$(MAKE) -C data_builder/graph_maker distclean
-	-rm -rv $(DOC_PATH) $(INSTALL_PATH) 
+	-rm -rv -f $(DOC_PATH) $(INSTALL_PATH) 
