@@ -369,6 +369,7 @@ namespace getfem {
 				std::cout << static_cast<float>(time_inverse)/CLOCKS_PER_SEC << std::endl;
 				scalar_type tol = descr.TOL;
 				std::cout << "[eigen_problem] Starting QR routine..." << std::endl;
+        std::cout << "[eigen_problem] We are working on " << n_totalvert << " degrees of freedom" <<std::endl;
 				dense_matrix_type dense_A(n_totalvert, n_totalvert);
 				gmm::copy(A, dense_A);
 				time_eig = clock();
@@ -407,7 +408,8 @@ namespace getfem {
 				complex_vector_type eigvals(n_totalvert, 1);
 				scalar_type tol = descr.TOL;
 				std::cout << "[eigen_problem] Starting QZ routine..." << std::endl;
-        		long info(0), lwork(-1);
+        std::cout << "[eigen_problem] We are working on " << n_totalvert << " degrees of freedom" <<std::endl;
+        long info(0), lwork(-1);
 				double work1;
         		gmm::dense_matrix<double> A_blas(n_totalvert, n_totalvert);
 				gmm::copy(A, A_blas);
