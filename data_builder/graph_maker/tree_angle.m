@@ -1,48 +1,49 @@
 % Tree graph generator
 %
-% This script generates a tree graph in a .txt (source and target coordinates, then their
-% buondary conditions). It is a 3 dimensional graph set only on a x-y plane in the box [0,L;0,L].
+% This script generates a tree graph in a *.txt (source and target coordinates, then their
+% buondary conditions). It is a 3 dimensional  graph set only on a x-y plane.
 % You can build it 2-dimensional just by commenting the signaled line.
-% This tree is made by changing the edge length (shortening), but manatining the bifurcation angle.
+% This tree is made by changing the bifurcation angle (tightening), but manatining the edge length.
 %
 % Input parameters:
 %      n      = number of the order of bifurcation (at least 2 to obtain
 %		        a Y configuration.)
 % out_filename = name of the output file. Put it in the ./data folder.
 %     ndim    = dimension of the problem (in this case is 2)
-%      L      = length of the Box
-%     theta   = angle usend in all the bifurcations
+%    length   = length of all Edges
+%    theta    = initial angle
 
 close all
 clear all
 
 addpath('./matlab_functions')
 
-% SETTING PARAMETERS
+% SETTING PARAMTERS
 % Number of order of bifurcation
 nbif = 4;
 % Setting dimension of the problem (comment what you want)
 ndim = 2;
 % ndim = 3;
 % Output file name
-% out_filename = '../data/txt_files/tree_edge.txt';
-out_filename = '../data/txt_files/tree_edge_pi6.txt';
-%Angle of bifurcation with respect to the axis which is x-axis
-% theta = pi/4;
-theta = pi/6;
+out_filename = '../data/txt_files/tree_angle.txt';
+% Edge lenght
+length_edge = 1;
+% Initial angle of bifurcation with respect to the axis which is x-axis
+% Will be divided by the order of biforcation minus 1
+theta = pi/4;
+% Starting point coordinates
+x_start = 0;
+y_start = 1;
 
 % COORDINATES & CONNECTION OF THE VERTEXES
 % Total number of points
 n = 2^nbif;
-% Length of the edge
-% Will be divided by the order of biforcation minus 1
-length_edge = 1;
 % Creating points vector
 points = zeros(n,2);
 con_vectors = zeros(n,n);
 % First two points
-points(1,:) = [0,0];
-points(2,:) = [points(1,1)+length_edge,points(1,2)];
+points(1,:) = [x_start,y_start];
+points(2,:) = [x_start+length_edge,y_start];
 con_vectors(1,1) = 2;
 con_vectors(2,1) = 1;
 % Counter of points that are already done
@@ -55,10 +56,10 @@ for j = 2:nbif
         counter = counter+1;
         % Every iteration assign the coordinates of two nodes from one of
         % the j-index iteration before this one
-        points(counter,:) = [points(counter-1-3*(i-1),1)+cos(theta)*length_edge/(j-1),
-            points(counter-1-3*(i-1),2)+sin(theta)*length_edge/(j-1)];
-        points(counter+1,:) = [points(counter-1-3*(i-1),1)+cos(theta)*length_edge/(j-1),
-            points(counter-1-3*(i-1),2)-sin(theta)*length_edge/(j-1)];
+        points(counter,:) = [points(counter-1-3*(i-1),1)+cos(theta/(j-1))*length_edge,
+            points(counter-1-3*(i-1),2)+sin(theta/(j-1))*length_edge];
+        points(counter+1,:) = [points(counter-1-3*(i-1),1)+cos(theta/(j-1))*length_edge,
+            points(counter-1-3*(i-1),2)-sin(theta/(j-1))*length_edge];
         % And then connects them:
         con_vectors(counter-1-3*(i-1),2:3) = [counter,counter+1];
         con_vectors(counter,1) = counter-1-3*(i-1);

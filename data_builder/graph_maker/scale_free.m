@@ -12,7 +12,7 @@ clear all
 
 % Adding needed function (FEMG & Contest) and output directory
 addpath('./matlab_functions')
-out_filename = '../data/scale_free20.txt';
+out_filename = '../data/txt_files/scale_free_prova.txt';
 
 % Dimension (comment the unwanted one)
 ndim = 2;
@@ -20,10 +20,10 @@ ndim = 2;
 
 % Circle information
 % Circle radius
-L = 4;
+L = 1;
 % Center of the circle
-x = 4;
-y = 4;
+x = 0;
+y = 0;
 
 % Number of vertices required (even)
 N = 20;

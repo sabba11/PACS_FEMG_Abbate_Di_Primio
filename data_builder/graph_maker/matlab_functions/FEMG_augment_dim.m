@@ -5,6 +5,7 @@
 % It takes as inputs:
 % points2d = matrix 2*n containing the coordiantes of the points
 
+
 function [points3d] = FEMG_augment_dim(points2d)
 [r,c] = size(points2d);
 points3d = [points2d, zeros(r,1)];

@@ -3,7 +3,8 @@
 % This script generates a tree graph in a .txt (source and target coordinates, then their
 % buondary conditions). It is a 3 dimensional graph set only on a x-y plane in the box [0,L;0,L].
 % You can build it 2-dimensional just by commenting the signaled line.
-% This tree is made by changing the edge length (shortening), but manatining the bifurcation angle.
+% This tree is made by changing the edge length (shortening), but manataining the bifurcation angle.
+% This tree do converge to a finite length tree.
 %
 % Input parameters:
 %      n      = number of the order of bifurcation (at least 2 to obtain
@@ -25,17 +26,16 @@ nbif = 4;
 ndim = 2;
 % ndim = 3;
 % Output file name
-% out_filename = '../data/txt_files/tree_edge.txt';
-out_filename = '../data/txt_files/tree_edge_pi6.txt';
+ out_filename = '../data/txt_files/tree_edge_conv.txt';
+% out_filename = '../data/txt_files/tree_mult_conv.txt';
+% out_filename = '../data/txt_files/tree_edge_conv_pi6.txt';
 %Angle of bifurcation with respect to the axis which is x-axis
-% theta = pi/4;
-theta = pi/6;
+theta = pi/4;
 
 % COORDINATES & CONNECTION OF THE VERTEXES
 % Total number of points
 n = 2^nbif;
 % Length of the edge
-% Will be divided by the order of biforcation minus 1
 length_edge = 1;
 % Creating points vector
 points = zeros(n,2);
@@ -55,10 +55,10 @@ for j = 2:nbif
         counter = counter+1;
         % Every iteration assign the coordinates of two nodes from one of
         % the j-index iteration before this one
-        points(counter,:) = [points(counter-1-3*(i-1),1)+cos(theta)*length_edge/(j-1),
-            points(counter-1-3*(i-1),2)+sin(theta)*length_edge/(j-1)];
-        points(counter+1,:) = [points(counter-1-3*(i-1),1)+cos(theta)*length_edge/(j-1),
-            points(counter-1-3*(i-1),2)-sin(theta)*length_edge/(j-1)];
+        points(counter,:) = [points(counter-1-3*(i-1),1)+cos(theta)*length_edge/((j-1)^2),
+            points(counter-1-3*(i-1),2)+sin(theta)*length_edge/((j-1)^2)];
+        points(counter+1,:) = [points(counter-1-3*(i-1),1)+cos(theta)*length_edge/((j-1)^2),
+            points(counter-1-3*(i-1),2)-sin(theta)*length_edge/((j-1)^2)];
         % And then connects them:
         con_vectors(counter-1-3*(i-1),2:3) = [counter,counter+1];
         con_vectors(counter,1) = counter-1-3*(i-1);
@@ -66,6 +66,7 @@ for j = 2:nbif
         counter = counter+1;
     end
 end
+
 %Augmenting dimension
 if ndim == 3
     points = FEMG_augment_dim(points);

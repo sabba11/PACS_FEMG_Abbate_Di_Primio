@@ -1,9 +1,9 @@
-% Graphene graph generator
+%% Graphene graph generator
 %
 % This script generates a simple graphene graph in a .txt (giving edges with
 % initial and final points coordinates with boundary conditions afterwards).
 % It is a 2 dimensional graph in the box [0,L;0,L] made by two exagon
-% linked by an edge
+% linked by an edge.
 % The setting and the points are saved as like as it is a 3d graph;
 % You can build it 2-dimensional just by commenting the signaled line.
 %
@@ -23,7 +23,7 @@ n = 12;
 ndim = 2;
 % ndim = 3;
 % Output file name
-out_filename = '../data/graphene.txt';
+out_filename = '../data/txt_files/graphene.txt';
 % Box lenght
 L = 5;
 

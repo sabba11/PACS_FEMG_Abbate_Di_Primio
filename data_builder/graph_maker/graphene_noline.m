@@ -23,7 +23,7 @@ n = 11;
 ndim = 2;
 % ndim = 3;
 % Output file name
-out_filename = '../data/graphene_noline.txt';
+out_filename = '../data/txt_files/graphene_noline.txt';
 % Box lenght: unitary
 L = 4;
 

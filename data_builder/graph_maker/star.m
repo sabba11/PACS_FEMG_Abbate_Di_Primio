@@ -26,7 +26,7 @@ n = 4;
 ndim = 2;
 % ndim = 3;
 % Output file name
-out_filename = '../data/star.txt';
+out_filename = '../data/txt_files/star.txt';
 % Box lenght
 L = 2;
 % Setting factor for translation
