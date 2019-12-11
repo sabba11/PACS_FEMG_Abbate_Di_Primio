@@ -362,11 +362,19 @@ namespace getfem {
 		getfem::asm_mass_matrix_param(V, mimg, mf_Ug, mf_coeffg, potential);
 		A.resize(n_totalvert, n_totalvert);
 		gmm::add(L, V, A);
-		vector_type R_dir(n_totalvert, 0);
-		for (unsigned i = 0; i < BCg.size(); i++)
-			if (BCg[i].label == "DIR")
-				R_dir[BCg[i].idx] = BCg[i].value;
-		getfem::assembling_Dirichlet_condition(A, F_source, mf_Ug, n_branches + 2, R_dir);
+		if (meshg.has_region(n_branches + 2)) {
+			#ifdef FEMG_VERBOSE_
+			std::cout << "[elliptic_problem] Assembling Dirichlet boundary conditions..." << std::endl;
+			#endif
+			vector_type R_dir(n_totalvert, 0);
+			for (unsigned i = 0; i < BCg.size(); i++)
+				if (BCg[i].label == "DIR")
+					R_dir[BCg[i].idx] = BCg[i].value;
+			std::cout << "DIR BC:" << std::endl;
+		  	for (unsigned i = 0; i < R_dir.size(); i++)
+				std::cout << R_dir[i] << std::endl;
+			getfem::assembling_Dirichlet_condition(A, F_source, mf_Ug, n_branches + 2, R_dir);
+		}
 		return;
 	}
 
@@ -379,12 +387,18 @@ namespace getfem {
 
 		vector_type B(n_totalvert);
 		getfem::asm_source_term(B, mimg, mf_Ug, mf_coeffg, F_source);
-		vector_type B_neu(n_totalvert);
+		vector_type B_neu(n_totalvert, 0);
 		vector_type BC_neu(n_totalvert);
-		for (unsigned i = 0; i < BCg.size(); i++)
-			if (BCg[i].label == "NEU")
-				BC_neu[BCg[i].idx] = BCg[i].value;
-		getfem::asm_source_term(B_neu, mimg, mf_Ug, mf_coeffg, BC_neu, n_branches+1);
+		if (meshg.has_region(n_branches + 1)) {
+			#ifdef FEMG_VERBOSE_
+			std::cout << "[elliptic_problem] Assembling Neumann-Kirchhoff boundary conditions..." << std::endl;
+			#endif
+
+			for (unsigned i = 0; i < BCg.size(); i++)
+				if (BCg[i].label == "NEU")
+					BC_neu[BCg[i].idx] = BCg[i].value;
+			getfem::asm_source_term(B_neu, mimg, mf_Ug, mf_coeffg, BC_neu, n_branches+1);
+		}
 		for (unsigned i = 0; i < B.size(); i++) {
 			F_source[i] = B[i] + B_neu[i];
 		}
@@ -423,7 +437,7 @@ namespace getfem {
 				converged_by_tol = iter.converged();
 				time_tot = clock() - time_tot;
 				log_data.push_back(std::make_pair("Time to compute solution (seconds): ", static_cast<float>(time_tot)/CLOCKS_PER_SEC));
-				log_data.push_back(std::make_pair("Number of iteration: ", static_cast<float>(n_iteration)));
+				log_data.push_back(std::make_pair("Number of iterations: ", static_cast<float>(n_iteration)));
 			  	log_data.push_back(std::make_pair("Converged by tolerance condition: ", static_cast<float>(converged_by_tol)));
 			}
 			GMM_STANDARD_CATCH_ERROR;
@@ -450,7 +464,7 @@ namespace getfem {
 				converged_by_tol = iter.converged();
 				time_tot = clock() - time_tot;
 				log_data.push_back(std::make_pair("Time to compute solution (seconds): ", static_cast<float>(time_tot)/CLOCKS_PER_SEC));
-				log_data.push_back(std::make_pair("Number of iteration: ", static_cast<float>(n_iteration)));
+				log_data.push_back(std::make_pair("Number of iterations: ", static_cast<float>(n_iteration)));
 				log_data.push_back(std::make_pair("Converged by tolerance condition: ", static_cast<float>(converged_by_tol)));
 			}
 			GMM_STANDARD_CATCH_ERROR;
@@ -490,7 +504,7 @@ namespace getfem {
 					converged_by_tol = iter.converged();
 					time_tot = clock() - time_tot;
 					log_data.push_back(std::make_pair("Time to compute solution (seconds): ", static_cast<float>(time_tot)/CLOCKS_PER_SEC));
-					log_data.push_back(std::make_pair("Number of iteration: ", static_cast<float>(n_iteration)));
+					log_data.push_back(std::make_pair("Number of iterations: ", static_cast<float>(n_iteration)));
 					log_data.push_back(std::make_pair("Converged by tolerance condition: ", static_cast<float>(converged_by_tol)));
 				}
 				else {
@@ -506,7 +520,7 @@ namespace getfem {
 					converged_by_tol = iter.converged();
 					time_tot = clock() - time_tot;
 					log_data.push_back(std::make_pair("Time to compute solution (seconds): ", static_cast<float>(time_tot)/CLOCKS_PER_SEC));
-	        		log_data.push_back(std::make_pair("Number of iteration: ", static_cast<float>(n_iteration)));
+	        		log_data.push_back(std::make_pair("Number of iterations: ", static_cast<float>(n_iteration)));
 					log_data.push_back(std::make_pair("Converged by tolerance condition: ", static_cast<float>(converged_by_tol)));
 				}
 			}
@@ -602,6 +616,7 @@ namespace getfem {
 		meshg.write_to_file(dir_name_builder.str() + "/mesh.mh" );
 	 	// when the 2nd arg is true, the mesh is saved with the |mf|
 		mf_Ug.write_to_file(dir_name_builder.str() + "/solution.mf", true);
+		log.close();
 		return;
 	}
 }// end of namespace
