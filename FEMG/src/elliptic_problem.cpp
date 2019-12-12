@@ -509,13 +509,13 @@ namespace getfem {
 				}
 				else {
 					#ifdef FEMG_VERBOSE_
-					std::cout << "[elliptic_problem] Using BICGSTAB..." << std::endl;
+					std::cout << "[elliptic_problem] Using BiCGSTAB..." << std::endl;
 					#endif
 			  		gmm::identity_matrix PR;
 					time_solve = clock();
 	      			gmm::bicgstab(A, U, F_source, PR, iter);
 					time_solve = clock() - time_solve;
-					log_data.push_back(std::make_pair("Time to BICGSTAB convergence (seconds): ", static_cast<float>(time_solve)/CLOCKS_PER_SEC));
+					log_data.push_back(std::make_pair("Time to BiCGSTAB convergence (seconds): ", static_cast<float>(time_solve)/CLOCKS_PER_SEC));
 					n_iteration = iter.get_iteration();
 					converged_by_tol = iter.converged();
 					time_tot = clock() - time_tot;
@@ -581,8 +581,38 @@ namespace getfem {
 		if( status )
 			std::cout << "[elliptic_problem] Directory " << dir_name_builder.str() << " created." << std::endl;
 		else {
-			if ( ec.message() == "Success" )
+			if ( ec.message() == "Success" ) {
 				std::cout << "[elliptic_problem] Directory " << dir_name_builder.str() << " already exists." << std::endl;
+				std::cout << "[elliptic_problem] Warning: exporting results may result in data conflicts." << std::endl;
+				std::cout << "[elliptic_problem] Delete or move the directory " << dir_name_builder.str() << " and hit Enter to continue." << std::endl;
+				std::cout << "[elliptic_problem] Warning: data in existing folder will be removed." << std::endl;
+				std::cout << "[elliptic_problem] Press Enter to continue..." << std::endl;
+				std::cin.ignore();
+				std::cin.ignore();
+				ec.clear();
+				status = boost::filesystem::create_directories(dir, ec);
+				if ( status )
+					std::cout << "[elliptic_problem] Directory " << dir_name_builder.str() << " created." << std::endl;
+				else
+					if ( ec.message() == "Success" ) {
+						ec.clear();
+						uintmax_t rmvd = boost::filesystem::remove_all(dir, ec);
+						std::cout << "[elliptic_problem] Pre-existing directory " << dir_name_builder.str() << " removed (it contained " << rmvd << " files)." << std::endl;
+						status = boost::filesystem::create_directories(dir, ec);
+						if ( status )
+							std::cout << "[elliptic_problem] Directory " << dir_name_builder.str() << " created." << std::endl;
+						else {
+							if (ec.message() == "Success") {
+								std::cout << "[elliptic_problem] Error while creating export directory: duplicate directory detected." << std::endl;
+								return;
+							}
+							else {
+								std::cout << "[elliptic_problem] Error while creating export directory: " << ec.message() << std::endl;
+								return;
+							}
+						}
+					}
+			}
 			else {
 				std::cerr << "[elliptic_problem] Error while creating export directory: " << ec.message() << std::endl;
 				return;

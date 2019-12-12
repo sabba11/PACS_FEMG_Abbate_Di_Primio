@@ -2,7 +2,7 @@
 	\file eigen_problem.cpp
 	\author Stefano Abbate
 	\author Andrea Di Primio
-	\brief Header containing the elliptic_problem derived class.
+	\brief Header containing the eigen_problem derived class.
 */
 
 // GetFEM++ libraries
@@ -369,7 +369,7 @@ namespace getfem {
 				std::cout << static_cast<float>(time_inverse)/CLOCKS_PER_SEC << std::endl;
 				scalar_type tol = descr.TOL;
 				std::cout << "[eigen_problem] Starting QR routine..." << std::endl;
-        std::cout << "[eigen_problem] We are working on " << n_totalvert << " degrees of freedom" <<std::endl;
+        		std::cout << "[eigen_problem] Working on " << n_totalvert << " degrees of freedom" <<std::endl;
 				dense_matrix_type dense_A(n_totalvert, n_totalvert);
 				gmm::copy(A, dense_A);
 				time_eig = clock();
@@ -408,8 +408,8 @@ namespace getfem {
 				complex_vector_type eigvals(n_totalvert, 1);
 				scalar_type tol = descr.TOL;
 				std::cout << "[eigen_problem] Starting QZ routine..." << std::endl;
-        std::cout << "[eigen_problem] We are working on " << n_totalvert << " degrees of freedom" <<std::endl;
-        long info(0), lwork(-1);
+        		std::cout << "[eigen_problem] Working on " << n_totalvert << " degrees of freedom" <<std::endl;
+        		long info(0), lwork(-1);
 				double work1;
         		gmm::dense_matrix<double> A_blas(n_totalvert, n_totalvert);
 				gmm::copy(A, A_blas);
@@ -492,8 +492,38 @@ namespace getfem {
 		if( status )
 			std::cout << "[eigen_problem] Directory " << dir_name_builder.str() << " created." << std::endl;
 		else {
-			if ( ec.message() == "Success" )
+			if ( ec.message() == "Success" ) {
 				std::cout << "[eigen_problem] Directory " << dir_name_builder.str() << " already exists." << std::endl;
+				std::cout << "[eigen_problem] Warning: exporting results may result in data conflicts." << std::endl;
+				std::cout << "[eigen_problem] Delete or move the directory " << dir_name_builder.str() << " and hit Enter to continue." << std::endl;
+				std::cout << "[eigen_problem] Warning: data in existing folder will be removed." << std::endl;
+				std::cout << "[eigen_problem] Press Enter to continue..." << std::endl;
+				std::cin.ignore();
+				std::cin.ignore();
+				ec.clear();
+				status = boost::filesystem::create_directories(dir, ec);
+				if ( status )
+					std::cout << "[eigen_problem] Directory " << dir_name_builder.str() << " created." << std::endl;
+				else
+					if ( ec.message() == "Success" ) {
+						ec.clear();
+						uintmax_t rmvd = boost::filesystem::remove_all(dir, ec);
+						std::cout << "[eigen_problem] Pre-existing directory " << dir_name_builder.str() << " removed (it contained " << rmvd << " files)." << std::endl;
+						status = boost::filesystem::create_directories(dir, ec);
+						if ( status )
+							std::cout << "[eigen_problem] Directory " << dir_name_builder.str() << " created." << std::endl;
+						else {
+							if (ec.message() == "Success") {
+								std::cout << "[eigen_problem] Error while creating export directory: duplicate directory detected." << std::endl;
+								return;
+							}
+							else {
+								std::cout << "[eigen_problem] Error while creating export directory: " << ec.message() << std::endl;
+								return;
+							}
+						}
+					}
+			}
 			else {
 				std::cerr << "[eigen_problem] Error while creating export directory: " << ec.message() << std::endl;
 				return;
