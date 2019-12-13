@@ -10,7 +10,7 @@ OUTPUT = 'tree/';
 %  MESH
 %===================================
 % Path to import the 1d list of points
-MESH_FILEG = '../../../data_builder/data/pts_files/tree_exp4_4_0002.pts'
+MESH_FILEG = '../../../data_builder/data/pts_files/tree_exp3_5_0001.pts'
 %===================================
 %  GETFEM DESCRIPTORS
 %===================================
