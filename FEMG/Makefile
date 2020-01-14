@@ -1,12 +1,3 @@
-# ====================================================================
-#   					"BGLgeom library"
-#      Course on Advanced Programming for Scientific Computing
-#                     Politecnico di Milano
-#                         A.Y. 2015-2016
-#
-#		Copyright (C) 2017 Ilaria Speranza & Mattia Tantardini
-#=====================================================================
-
 # Including general Makefile.inc of the project
 MAKEFILEH_DIR=../
 include $(MAKEFILEH_DIR)/Makefile.inc

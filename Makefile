@@ -10,6 +10,7 @@ override CPPFLAGS := $(CPPFLAGS) $(INCLUDES) -DGMM_USES_LAPACK
 
 help:
 	@echo "make help: ------- Prints this help"
+	@echo "make doc: -------- Builds Doxygen documentation"
 	@echo "make all: -------- Makes libraries, test problems and the data builder"
 	@echo "make library: ---- Makes both static and dynamic libraries"
 	@echo "make eigen: ------ Builds eigen problems - library needed"

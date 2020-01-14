@@ -48,19 +48,19 @@ namespace getfem {
 		*/
 		virtual void init(int argc, char *argv[]) {
 			//1. Read the .param filename from standard input
-   	     	INPUT.read_command_line(argc, argv);
+		 	INPUT.read_command_line(argc, argv);
 
-   	     	//2. Import data (algorithm specifications, boundary conditions,...)
-   	     	import_data();
+		 	//2. Import data (algorithm specifications, boundary conditions,...)
+		 	import_data();
 
-   	     	//3. Build mesh for the graph
-   	     	build_mesh();
+		 	//3. Build mesh for the graph
+		 	build_mesh();
 
-   	    	//4. Set finite elements and integration methods
-   	     	set_im_and_fem();
+			//4. Set finite elements and integration methods
+		 	set_im_and_fem();
 
-   		 	//5. Set default values for coefficients
-   	 	 	set_default_coefficients();
+			//5. Set default values for coefficients
+			set_default_coefficients();
 
 			return;
 		}
@@ -119,7 +119,7 @@ namespace getfem {
 
 		/*
 		+------------------------------------------------------+
-		| 2. Input file										   |
+		| 2. Input file                                        |
 		+------------------------------------------------------+
 		*/
 		//! Input file.
@@ -127,7 +127,7 @@ namespace getfem {
 
 		/*
 		+------------------------------------------------------+
-		| 3. Graph properties								   |
+		| 3. Graph properties                                  |
 		+------------------------------------------------------+
 		*/
 		//! Dimensions of the problem.
@@ -173,7 +173,7 @@ namespace getfem {
 
 		/*
 		+------------------------------------------------------+
-		| 5. Auxiliary methods for init procedure 			   |
+		| 5. Auxiliary methods for init procedure              |
 		+------------------------------------------------------+
 		*/
 		//5.1 Pure virtual methods for init procedures.
@@ -251,7 +251,7 @@ namespace getfem {
 
 		/*
 		+------------------------------------------------------+
-		| 6. Data structure for log data					   |
+		| 6. Data structure for log data                       |
 		+------------------------------------------------------+
 		*/
 		//! Vector structure to save log data

@@ -84,7 +84,7 @@ namespace getfem {
 	private:
 		/*
 		+------------------------------------------------------+
-		| 1. Descriptors struct 							   |
+		| 1. Descriptors struct                                |
 		+------------------------------------------------------+
 		*/
 		//! Struct to contain all descriptors.
@@ -115,7 +115,7 @@ namespace getfem {
 
 		/*
 		+------------------------------------------------------+
-		| 3. Numerical solvers variables					   |
+		| 3. Numerical solvers variables                       |
 		+------------------------------------------------------+
 		*/
 		//! Number of iterations to achieve convergence (at most ITER).
@@ -129,7 +129,7 @@ namespace getfem {
 
 		/*
 		+------------------------------------------------------+
-		| 4. Auxiliary methods								   |
+		| 4. Auxiliary methods                                 |
 		+------------------------------------------------------+
 		*/
 		// 4.1 Auxiliary methods for init procedure
