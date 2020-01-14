@@ -48,13 +48,11 @@ namespace getfem {
 	elliptic_problem::build_mesh()
 	{
 		#ifdef FEMG_VERBOSE_
-	    std::cout << "[elliptic_problem] Importing mesh from data file..." << std::endl;
-	    #endif
+		std::cout << "[elliptic_problem] Importing mesh from data file..." << std::endl;
+		#endif
 
-	    std::ifstream ifs(descr.MESH_FILEG);
-	    GMM_ASSERT1(ifs.good(),"Unable to read from file " << descr.MESH_FILEG);
-      	//ACHTUNG!: for the moment we don't give mesh step as an input parameter
-			// if we reimplement it back you should give it
+		std::ifstream ifs(descr.MESH_FILEG);
+		GMM_ASSERT1(ifs.good(),"Unable to read from file " << descr.MESH_FILEG);
 		std::ifstream rad;
 		if (descr.IMPORT_RADIUS) {
 			#ifdef FEMG_VERBOSE_
@@ -64,12 +62,12 @@ namespace getfem {
 			rad.open(descr.RFILE);
 			GMM_ASSERT1(rad.good(), "Unable to read from file " << descr.RFILE);
 		}
-	    import_pts_file(ifs, rad, descr.IMPORT_RADIUS);
+		import_pts_file(ifs, rad, descr.IMPORT_RADIUS);
 
-	    //n_branches = n_vertices.size();
-  		n_totalvert = meshg.nb_points();
+		//n_branches = n_vertices.size();
+			n_totalvert = meshg.nb_points();
 
-	    ifs.close();
+		ifs.close();
 		if (descr.IMPORT_RADIUS)
 			rad.close();
 		return;
@@ -96,6 +94,7 @@ namespace getfem {
 
 	    mf_Ug.set_finite_element(meshg.convex_index(), pf_Ug);
 	    mf_coeffg.set_finite_element(meshg.convex_index(), pf_coeffg);
+		return;
 	}
 
 	void
@@ -173,16 +172,15 @@ namespace getfem {
 		for (unsigned i = 0; i < f_vec.size(); i++) {
 			vector_type weight(n_totalvert);
 			for (unsigned j = 0; j < meshg.points().size(); j++)
-	    		weight[j] = f_vec[i](meshg.points()[j]);
-	  	GMM_ASSERT1(s_vec[i] == "weight" || s_vec[i] == "potential", "Invalid string input data.");
-	  	if (s_vec[i] == "weight")
-	    	weight.swap(weights);
-	  	else if (s_vec[i] == "potential")
-	    	weight.swap(potential);
+				weight[j] = f_vec[i](meshg.points()[j]);
+			GMM_ASSERT1(s_vec[i] == "weight" || s_vec[i] == "potential", "Invalid string input data.");
+			if (s_vec[i] == "weight")
+				weight.swap(weights);
+			else if (s_vec[i] == "potential")
+				weight.swap(potential);
 		}
 		return;
 	}
-
 
 	//Builds source vector
 	void
@@ -311,14 +309,14 @@ namespace getfem {
 		    	gmm::mult(Rotz_1,w,v);
 		  	}
 		  else {
-		    gmm::mult(Rotx_2,v,w);
-		    gmm::mult(Rotz_2,w,v);
+			  gmm::mult(Rotx_2,v,w);
+			  gmm::mult(Rotz_2,w,v);
 		  }
 		  mean_points[i][0] = v[0] + point[0]; mean_points[i][1] =  v[1] + point[1]; mean_points[i][2] = v[2] + point[2];
 		}
 		scalar_type mean = 0.0;
 		for (size_type i = 0; i < n_mean_points; i++){
-		  mean += f(mean_points[i]);
+			mean += f(mean_points[i]);
 		}
 		mean = mean/n_mean_points;
 		return mean;
@@ -485,7 +483,7 @@ namespace getfem {
 				bool check_sym = false;
 				dense_matrix_type A_trans(n_totalvert,n_totalvert);
 				gmm::copy(A, A_trans);
-	    		gmm::transposed(A_trans);
+				gmm::transposed(A_trans);
 				dense_matrix_type A_sym(n_totalvert,n_totalvert);
 				gmm::add(A, gmm::scaled(A_trans, -1.0), A_sym);
 				if (gmm::mat_maxnorm(A_sym)<1E-12)
@@ -511,16 +509,16 @@ namespace getfem {
 					#ifdef FEMG_VERBOSE_
 					std::cout << "[elliptic_problem] Using BiCGSTAB..." << std::endl;
 					#endif
-			  		gmm::identity_matrix PR;
+						gmm::identity_matrix PR;
 					time_solve = clock();
-	      			gmm::bicgstab(A, U, F_source, PR, iter);
+						gmm::bicgstab(A, U, F_source, PR, iter);
 					time_solve = clock() - time_solve;
 					log_data.push_back(std::make_pair("Time to BiCGSTAB convergence (seconds): ", static_cast<float>(time_solve)/CLOCKS_PER_SEC));
 					n_iteration = iter.get_iteration();
 					converged_by_tol = iter.converged();
 					time_tot = clock() - time_tot;
 					log_data.push_back(std::make_pair("Time to compute solution (seconds): ", static_cast<float>(time_tot)/CLOCKS_PER_SEC));
-	        		log_data.push_back(std::make_pair("Number of iterations: ", static_cast<float>(n_iteration)));
+					log_data.push_back(std::make_pair("Number of iterations: ", static_cast<float>(n_iteration)));
 					log_data.push_back(std::make_pair("Converged by tolerance condition: ", static_cast<float>(converged_by_tol)));
 				}
 			}
@@ -562,7 +560,7 @@ namespace getfem {
 		// Temporary code.
 		std::cout << "[elliptic_problem] Printing solution..." << std::endl;
 		for(auto it = U.begin(); it != U.end(); it++)
-		   std::cout << *it << std::endl;
+			std::cout << *it << std::endl;
 		// Number of vertices in the graph without the mesh
 		std::cout << "Number of original vertices: " << n_origvert << std::endl;
 		// Number of vertices in the extended graph

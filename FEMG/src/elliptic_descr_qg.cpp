@@ -27,7 +27,7 @@ namespace getfem {
 	elliptic_descr_qg::elliptic_check_validity(void) const
 	{
 		bool check1 = (COMP_METHOD == "LU" || COMP_METHOD == "CG" || COMP_METHOD == "GMRES" || COMP_METHOD == "QMR");
-    	bool check2 = true;
+		bool check2 = true;
 		if (COMP_METHOD != "LU")
 			check2 = (TOL > 0);
 		bool check3 = true;
