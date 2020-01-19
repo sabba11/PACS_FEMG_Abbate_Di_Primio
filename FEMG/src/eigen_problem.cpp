@@ -313,6 +313,21 @@ namespace getfem {
 		M.resize(n_totalvert, n_totalvert);
 		getfem::asm_mass_matrix_param(M, mimg, mf_Ug, mf_coeffg, right_weights);
 		gmm::clean(M, 1E-10);
+        if (meshg.has_region(n_branches + 2)) {
+            #ifdef FEMG_VERBOSE_
+            std::cout << "[eigen_problem] Assembling Dirichlet boundary conditions..." << std::endl;
+            #endif
+            for (unsigned i = 0; i < BCg.size(); i++){
+                if (BCg[i].label == "DIR"){
+                    GMM_ASSERT1(BCg[i].value==0,"[eigen_problem] Non-zero Dirichlet Boundary Condition");
+                    for (unsigned j = 0; j < n_totalvert; j++){
+                        //M(j,BCg[i].idx) = 0.0;
+                        M(BCg[i].idx,j) = 0.0;
+                    }
+                    M(BCg[i].idx,BCg[i].idx) = 1.0;
+                }
+            }
+        }
 
 		return;
 	}
@@ -328,12 +343,21 @@ namespace getfem {
 		getfem::asm_mass_matrix_param(V, mimg, mf_Ug, mf_coeffg, potential);
 		A.resize(n_totalvert, n_totalvert);
 		gmm::add(L, V, A);
-		//vector_type R_dir(n_totalvert, 0);
-		//vector_type zeros(n_totalvert, 0);
-		//for (unsigned i = 0; i < BCg.size(); i++)
-		//	if (BCg[i].label == "DIR")
-		//		R_dir[BCg[i].idx] = BCg[i].value;
-		//getfem::assembling_Dirichlet_condition(A, zeros	, mf_Ug, n_branches + 2, R_dir);
+        if (meshg.has_region(n_branches + 2)) {
+            #ifdef FEMG_VERBOSE_
+            std::cout << "[eigen_problem] Assembling Dirichlet boundary conditions..." << std::endl;
+            #endif
+            for (unsigned i = 0; i < BCg.size(); i++){
+                if (BCg[i].label == "DIR"){
+                    GMM_ASSERT1(BCg[i].value==0,"[eigen_problem] Non-zero Dirichlet Boundary Condition");
+                    for (unsigned j = 0; j < n_totalvert; j++){
+                        //A(BCg[i].idx,j) = 0.0;
+                        A(j,BCg[i].idx) = 0.0;
+                    }
+                    A(BCg[i].idx,BCg[i].idx) = 1.0;
+                }
+            }
+        }
 		return;
 	}
 
