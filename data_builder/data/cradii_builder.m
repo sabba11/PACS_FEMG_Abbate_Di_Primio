@@ -3,14 +3,14 @@
 close all
 clear all
 % File infos
-% out_filename = 'cradii_star.txt';
-% in_filename = 'star.txt';
-% out_filename = 'cradii_graphene.txt';
-% in_filename = 'graphene.txt';
-% out_filename = 'cradii_tree.txt';
-% in_filename = 'tree_edge.txt';
-out_filename = 'cradii_scale free.txt';
-in_filename = 'scale_free.txt';
+out_filename = 'txt_files/cradii_star.txt';
+in_filename = 'txt_files/star.txt';
+% out_filename = 'txt_files/cradii_graphene.txt';
+% in_filename = 'txt_files/graphene.txt';
+% out_filename = 'txt_files/cradii_tree.txt';
+% in_filename = 'txt_files/tree_angle.txt';
+% out_filename = 'txt_files/cradii_scale_free.txt';
+% in_filename = 'txt_files/scale_free_20.txt';
 % Decide the radius
 radius = 0.1;
 % Writing routine

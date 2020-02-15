@@ -1,8 +1,6 @@
 %=======================================================================================
 %  GENERAL FLAGS
 %=======================================================================================
-% Flag to export results
-EXPORT = 1;
 % Directory in which solutions will be exported, leave empty to choose
 % the directory containing main.
 OUTPUT = 'star/';
@@ -10,7 +8,7 @@ OUTPUT = 'star/';
 %  MESH
 %===================================
 % Path to import the 1d list of points
-MESH_FILEG = '../../../data_builder/data/star_5.pts'
+MESH_FILEG = '../../../data_builder/data/pts_files/star_5.pts'
 %===================================
 %  GETFEM DESCRIPTORS
 %===================================
@@ -40,6 +38,6 @@ MAX_ITER  = 1000;
 % Coefficient and source are set in main
 % Importing radius for the calculation of the external sources
 % Boolean
-IMPORT_RADIUS = 1;
+IMPORT_RADIUS = 0;
 % Path of the file containing the radii
-RFILE = '../../../data_builder/data/cradii_star.txt'
+RFILE = '../../../data_builder/data/txt_files/cradii_star.txt'

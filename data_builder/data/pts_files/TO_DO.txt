@@ -1,0 +1,9 @@
+We have to make the following .pts
+ptsbuilder_N 5 ../data/txt_files/graphene.txt ../data/pts_files/graphene_5.pts
+ptsbuilder_N 100 ../data/txt_files/graphene.txt ../data/pts_files/graphene_100.pts
+ptsbuilder_N 5 ../data/txt_files/star.txt ../data/pts_files/star_5.pts
+ptsbuilder_N 100 ../data/txt_files/star.txt ../data/pts_files/star_100.pts
+ptsbuilder_N 5 ../data/txt_files/tree_angle.txt ../data/pts_files/tree_5.pts
+ptsbuilder_N 100 ../data/txt_files/tree_angle.txt ../data/pts_files/tree_100.pts
+ptsbuilder_N 376 ../data/txt_files/scale_free_20.txt ../data/pts_files/scale_free_N.pts
+ptsbuilder_h 0.1 ../data/txt_files/scale_free_20.txt ../data/pts_files/scale_free_h.pts

@@ -25,11 +25,11 @@ nbif = 4;
 ndim = 2;
 % ndim = 3;
 % Output file name
-% out_filename = '../data/txt_files/tree_edge.txt';
-out_filename = '../data/txt_files/tree_edge_pi6.txt';
+ out_filename = '../data/txt_files/tree_edge.txt';
+
 %Angle of bifurcation with respect to the axis which is x-axis
-% theta = pi/4;
-theta = pi/6;
+theta = pi/4;
+
 
 % COORDINATES & CONNECTION OF THE VERTEXES
 % Total number of points
@@ -77,7 +77,7 @@ FEMG_check_graph(Matrix_adj,n)
 % BOUNDARY CONDITIONS
 % We give only inflow in one tips and the outflow and int for central
 BC = zeros(n,5);
-BC(1,:) = ['DIR ', '1'];
+BC(1,:) = ['DIR ', '0'];
 % Assign outflow and internal
 [BC] = FEMG_assign_cond(BC,n,Matrix_adj);
 

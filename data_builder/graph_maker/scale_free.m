@@ -1,5 +1,5 @@
 % Barabasi-Albert Graph
-% 
+%
 % This file builds a 2-dimensional scale-free graph with the
 % Barabasi-Albert algorithm found in the Contest MATLAB toolkit.
 % After building the adjacency  matrix the points will be taken on a
@@ -12,7 +12,7 @@ clear all
 
 % Adding needed function (FEMG & Contest) and output directory
 addpath('./matlab_functions')
-out_filename = '../data/txt_files/scale_free_prova.txt';
+out_filename = '../data/txt_files/scale_free_20.txt';
 
 % Dimension (comment the unwanted one)
 ndim = 2;

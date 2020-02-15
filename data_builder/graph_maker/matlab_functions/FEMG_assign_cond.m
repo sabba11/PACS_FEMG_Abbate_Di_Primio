@@ -21,7 +21,7 @@ for i = 1:n
             BC(i,:) = ['NEU ','0'];
         %If internal vertex put internal condition with default zero value
         else
-            BC(i,:) = ['INT ','0'];
+            BC(i,:) = ['NEU ','0'];
         end
     end
 end

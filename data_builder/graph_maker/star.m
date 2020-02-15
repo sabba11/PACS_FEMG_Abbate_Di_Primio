@@ -63,7 +63,7 @@ FEMG_check_graph(Matrix_adj,n)
 % BOUNDARY CONDITIONS
 % We give only inflow in one tips and the outflow and int for central
 BC = zeros(ntot,5);
-BC(2,:) = ['DIR ', '1'];
+BC(2,:) = ['DIR ', '0'];
 % Assign outflow and internal
 [BC] = FEMG_assign_cond(BC,ntot,Matrix_adj);
 
