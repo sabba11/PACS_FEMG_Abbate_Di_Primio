@@ -427,7 +427,7 @@ namespace getfem {
 				gmm::iteration iter(tol);
 				if (descr.BY_ITERATION)
 					iter.set_maxiter(descr.ITER);
-				size_t restart = 50;
+				size_t restart = descr.RESTART;
 				gmm::identity_matrix PR;
 				gmres_start = std::chrono::steady_clock::now();
 				gmm::gmres(A, U, F_source, PR, restart, iter);

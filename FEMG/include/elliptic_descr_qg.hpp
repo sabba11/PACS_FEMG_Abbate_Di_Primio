@@ -40,6 +40,9 @@ namespace getfem {
 		//! Maximum number of iterations (for iterative solvers).
 		scalar_type ITER = 0;
 
+		//! Restart parameters for GMRES method
+		int restart;
+
 	protected:
 		//! Overridden import() method to define custom descriptors.
 		/*!
