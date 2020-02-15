@@ -42,8 +42,6 @@ namespace getfem {
 			}
 		}
 
-		size_type globalBoundaries = 0;
-
 		std::vector<base_node> rpoints;
 		std::vector<base_node> spoints;
 		std::vector<size_type> BC_check;
@@ -61,7 +59,6 @@ namespace getfem {
 			std::string tmp, BCtype, value;
 			bool thend = false;
 			size_type bcflag = 0;
-			size_type bcintI = 0, bcintF = 0;
 			node BCA, BCB;
 
 			// Read an arc from data file and write to lpoints
@@ -81,12 +78,10 @@ namespace getfem {
 						if (bcflag == 1) {
 							BCA.label = BCtype;
 							BCA.value = stof(value);
-							globalBoundaries++;
 						}
 						else if (bcflag == 2) {
 							BCB.label = BCtype;
 							BCB.value = stof(value);
-							globalBoundaries++;
 						}
 						else
 							GMM_ASSERT1(0, "More than 2 BC found on this arc!");
@@ -96,24 +91,10 @@ namespace getfem {
 						if (bcflag == 1) {
 							BCA.label = BCtype;
 							BCA.value = stof(value);
-							globalBoundaries++;
 						}
 						else if (bcflag == 2) {
 							BCB.label = BCtype;
 							BCB.value = stof(value);
-							globalBoundaries++;
-						}
-				}
-				else if (BCtype.compare("INT") == 0) {
-						if (bcflag == 1) {
-							bcintI++;
-							BCA.label = BCtype;
-							//BCA.value = stof(value); //Error: no number to read
-						}
-						else if (bcflag == 2) {
-							bcintF++;
-							BCB.label = BCtype;
-							//BCB.value = stof(value); //Error: no number to read
 						}
 						else
 							GMM_ASSERT1(0, "More than 2 BC found on this arc!");
@@ -137,7 +118,7 @@ namespace getfem {
 						if (d == 4 || d == 3)
 							dim_prob = d;
 						else
-							GMM_ASSERT1(0, "Points must have 3 or 2 coordinates - number of coordinates:" << d);
+							GMM_ASSERT1(0, "Points must have 3 or 2 coordinates - number of expected coordinates:" << d-1);
 						dim_check = false;
 					}
 					base_node tmpn;
@@ -190,14 +171,14 @@ namespace getfem {
 			}
 
 			//Updating boundary condition list
-			if ((bcflag>0) && (bcintI==0)){
+			if (bcflag>0){
 				BCg.push_back(BCA);
 				BC_check.push_back(BCg.size());
 			}
 			else
 				BC_check.push_back(0);
 
-			if ((bcflag>1) && (bcintF==0)){
+			if (bcflag>1){
 				BCg.push_back(BCB);
 				BC_check.push_back(BCg.size());
 			}
@@ -265,14 +246,13 @@ namespace getfem {
 					meshg.region(dirichlet_bc_region).add(cv, 1);
 				else if (BCg[BC_check[i]-1].label == "NEU")
 					meshg.region(neumann_bc_region).add(cv, 1);
-				else if (BCg[BC_check[i]-1].label == "INT")
-					meshg.region(neumann_bc_region).add(cv, 1);
 				else
 					GMM_ASSERT1(false, "Invalid boundary condition. Valid boundary conditions are: DIR (Dirichlet), NEU (Neumann-Kirchhoff).");
 			}
 		} /*end of rpoints for */
 		//checking that boundary conditions related to the same node are coherent
-		check_boundary_conditions();
+		if (BCg.size()>0)
+			check_boundary_conditions();
 		return;
 	}
 
