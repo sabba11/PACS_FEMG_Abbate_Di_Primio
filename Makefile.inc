@@ -26,7 +26,7 @@ includes := $(foreach inc,$(ALL_INC_DIR),-I$(inc))
 INCLUDES += -I. -I./include $(includes)
 
 # Linking libraries
-LDLIBS += -L$(mkBGLInc)/../lib -lboost_filesystem -L$(mkBGLInc)/../lib -lboost_system -L$(FEMG_DIR)/lib -lFEMG -lqhull -llapack -llapacke -lblas -lgetfem -lblas -llapacke -llapack -lqhull -L$(FEMG_DIR)/lib -lFEMG  -L$(mkBGLInc)/../lib -lboost_system -L$(mkBGLInc)/../lib -lboost_filesystem -L$(mkBGLInc)/../lib
+LDLIBS += -L$(mkBGLInc)/../lib -lboost_filesystem -L$(mkBGLInc)/../lib -lboost_system -L$(FEMG_DIR)/lib -lFEMG -lqhull -llapack -llapacke -lblas -L$(GETFEM_LIB_DIR) -lgetfem -lblas -llapacke -llapack -lqhull -L$(FEMG_DIR)/lib -lFEMG  -L$(mkBGLInc)/../lib -lboost_system -L$(mkBGLInc)/../lib -lboost_filesystem -L$(mkBGLInc)/../lib
 
 
 
