@@ -30,9 +30,6 @@
 extern "C" {void dggev_( char* jobvl, char* jobvr, long unsigned int* na, double* a, long unsigned int* nb, double* b,
                          long unsigned int* lda, double* wr, double* wi, double* wd, double* vl, long unsigned int* ldvl,
                          double* vr, long unsigned int* ldvr, double* work, long int* lwork, long int* info );}
-// extern void dggev_( char* jobvl, char* jobvr, long unsigned int* na, double* a, long unsigned int* nb, double* b,
-//                 long unsigned int* lda, double* wr, double* wi, double* wd, double* vl, long unsigned int* ldvl,
-//                 double* vr, long unsigned int* ldvr, double* work, long int* lwork, long int* info );
 
 namespace getfem {
 

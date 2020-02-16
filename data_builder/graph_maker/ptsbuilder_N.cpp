@@ -95,13 +95,11 @@ int main( int argc, char* argv[] ) {
     while (!reader.is_eof()) {
       Vertex_base_property<dim3,num_BC> source;
       Vertex_base_property<dim3,num_BC> target;
-      //Edge_base_property<linear_geometry<3>, 3> edge;
       Edge_desc<Graph3> e;
       Vertex_desc<Graph3> s,d;
       reader.get_data();
       source = reader.get_source_data(); //acquiring data...
       target = reader.get_target_data();
-      //edge = reader.get_edge_data();
       s = new_vertex(source, G, check);
       d = new_vertex(target, G, check); //modifying the graph
       e = new_linear_edge(s, d, G);
