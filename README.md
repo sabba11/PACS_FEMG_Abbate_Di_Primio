@@ -27,7 +27,7 @@ The BGLgeom library is not strictly necessary to build the project, although it 
 The BGLgeom repository can be found [here.](https://github.com/lformaggia/Pacs_BGLgeom_Ilaria_Mattia "BGLgeom repository")
 
 ## Installation
-To build the library, firstly fill the file Makefile.inc as indicated therein. Only empty fields have to be modified. Then, open the terminal and run  
+To build the library, firstly fill the files Makefile.inc and data_builder/graph_maker/Makefile.inc as indicated therein. Only empty fields have to be modified. Then, open the terminal and run  
 `$ make all`  
 to compile the whole project in the specified installation folder. Partial compilations can be made, type   
 `$ make help`  
@@ -39,7 +39,18 @@ every time the project is compiled from a new terminal session. To modify the va
 `$ sudo nano ~/.bashrc`  
 and add the `export` command above (without the initial `$` sign) as the last line of the file.
 
+A known issue involves setting up the Makefile of the BGLgeom library. First, modify the following in Makefile.inc:
+1. `libvtk*.so.1` in place of `libvtk*.so.5.10.1` at line 69 (if not using VTK 5.10);
+2. `$(basename $(basename $(VTK_LIBS2)))` in place of `$(basename $(basename $(basename $(basename $(VTK_LIBS2)))))` at line 70 (if not using VTK 5.10);
+
+Then, in libBGLgeom/Makefile:
+
+3. `-soname` in place of `-$(SONAME)` at line 62.
+
 ## Execution and postprocessing
 For details on how to execute the code and postprocess the results, refer to the `README.md` in the `test_problem` folder.
+
+## Dev settings
+The code has been tested on Linux Ubuntu 18.04. 
 
 
