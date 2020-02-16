@@ -19,6 +19,9 @@ namespace getfem {
 			if (BY_ITERATION)
 				ITER = FILE_.int_value("ITER", "Maximum iteration");
 		}
+		if (COMP_METHOD == "GMRES"){
+			RESTART = FILE_.int_value("RESTART", "Restart parameter for GMRES")
+		}
 		GMM_ASSERT1(elliptic_check_validity(), "Invalid COMP_METHOD, TOL or ITER in .param file.");
 		return;
 	}
@@ -32,8 +35,10 @@ namespace getfem {
 			check2 = (TOL > 0);
 		bool check3 = true;
 		if (COMP_METHOD != "LU" && BY_ITERATION)
-				check3 = (ITER > 0);
-		return (check1 & check2 & check3);
+			check3 = (ITER > 0);
+		if (COMP_METHOD == "GMRES")
+			check4 = (RESTART >= 0);
+		return (check1 & check2 & check3 & check4);
 	}
 
 	void
@@ -44,9 +49,11 @@ namespace getfem {
 		std::cout << "--------------------------------------------------" << std::endl;
 		std::cout << " COMPUTATIONAL METHOD      : " << COMP_METHOD << std::endl;
 		if (COMP_METHOD != "LU")
-			std::cout << " TOLERANCE                 : " << TOL << std::endl;
+			std::cout << " TOLERANCE                  : " << TOL << std::endl;
 		if (COMP_METHOD != "LU" && BY_ITERATION)
 			std::cout << " ITERATIONS                 : " << ITER << std::endl;
+		if (COMP_METHOD == "GMRES")
+			std::cout << " GMRES RESTART              : " << RESTART << std::endl;
 		return;
 	}
 

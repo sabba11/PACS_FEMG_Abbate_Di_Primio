@@ -20,6 +20,7 @@
 #include <iostream>
 #include <fstream>
 #include <time.h>
+#include <chrono>
 #include <boost/filesystem.hpp>
 #include <vector>
 #include <math.h>
@@ -33,15 +34,15 @@ namespace getfem {
 	void
 	elliptic_problem::import_data()
 	{
-	    #ifdef FEMG_VERBOSE_
-	    std::cout << "[elliptic_problem] Importing problem descriptors..." << std::endl;
-	    #endif
+		#ifdef FEMG_VERBOSE_
+		std::cout << "[elliptic_problem] Importing problem descriptors..." << std::endl;
+		#endif
 
-	    descr.import_all(INPUT);
+		descr.import_all(INPUT);
 
-	    #ifdef FEMG_VERBOSE_
-	    std::cout << descr;
-	    #endif
+		#ifdef FEMG_VERBOSE_
+		std::cout << descr;
+		#endif
 	}
 
 	void
@@ -76,24 +77,24 @@ namespace getfem {
 	void
 	elliptic_problem::set_im_and_fem()
 	{
-	    #ifdef FEMG_VERBOSE_
-	    std::cout << "[elliptic_problem] Setting GetFEM++ integration method..."<< std::endl;
-	    #endif
+		#ifdef FEMG_VERBOSE_
+		std::cout << "[elliptic_problem] Setting GetFEM++ integration method..."<< std::endl;
+		#endif
 
-	    pintegration_method pim_g = int_method_descriptor(descr.IM_TYPEG);
-	    mimg.set_integration_method(meshg.convex_index(), pim_g);
+		pintegration_method pim_g = int_method_descriptor(descr.IM_TYPEG);
+		mimg.set_integration_method(meshg.convex_index(), pim_g);
 
-	    #ifdef FEMG_VERBOSE_
-	    std::cout << "[elliptic_problem] Setting GetFEM++ Finite Element method..."<< std::endl;
-	    #endif
+		#ifdef FEMG_VERBOSE_
+		std::cout << "[elliptic_problem] Setting GetFEM++ Finite Element method..."<< std::endl;
+		#endif
 
-	    bgeot::pgeometric_trans pgt_g = bgeot::geometric_trans_descriptor(descr.MESH_TYPEG);
+		bgeot::pgeometric_trans pgt_g = bgeot::geometric_trans_descriptor(descr.MESH_TYPEG);
 
-	    pfem pf_Ug = fem_descriptor(descr.FEM_TYPEG);
-	    pfem pf_coeffg = fem_descriptor(descr.FEM_TYPEG_DATA);
+		pfem pf_Ug = fem_descriptor(descr.FEM_TYPEG);
+		pfem pf_coeffg = fem_descriptor(descr.FEM_TYPEG_DATA);
 
-	    mf_Ug.set_finite_element(meshg.convex_index(), pf_Ug);
-	    mf_coeffg.set_finite_element(meshg.convex_index(), pf_coeffg);
+		mf_Ug.set_finite_element(meshg.convex_index(), pf_Ug);
+		mf_coeffg.set_finite_element(meshg.convex_index(), pf_coeffg);
 		return;
 	}
 
@@ -305,14 +306,14 @@ namespace getfem {
 		for (size_type i = 0; i < n_mean_points; i++){
 			v[0] = mean_points[i][0]; v[1] = mean_points[i][1]; v[2] = mean_points[i][2];
 		  	if (tg_vector[1]>0){
-		  		gmm::mult(Rotx_1,v,w);
-		    	gmm::mult(Rotz_1,w,v);
+				gmm::mult(Rotx_1,v,w);
+				gmm::mult(Rotz_1,w,v);
 		  	}
-		  else {
-			  gmm::mult(Rotx_2,v,w);
-			  gmm::mult(Rotz_2,w,v);
-		  }
-		  mean_points[i][0] = v[0] + point[0]; mean_points[i][1] =  v[1] + point[1]; mean_points[i][2] = v[2] + point[2];
+			else {
+				gmm::mult(Rotx_2,v,w);
+				gmm::mult(Rotz_2,w,v);
+			}
+			mean_points[i][0] = v[0] + point[0]; mean_points[i][1] =  v[1] + point[1]; mean_points[i][2] = v[2] + point[2];
 		}
 		scalar_type mean = 0.0;
 		for (size_type i = 0; i < n_mean_points; i++){
@@ -417,24 +418,27 @@ namespace getfem {
 			std::cout << "[elliptic_problem] Solving the problem via GMRES algorithm..." << std::endl;
 			#endif
 			try {
-				clock_t time_solve,time_tot;
-				time_tot = clock();
+				std::chrono::time_point<std::chrono::steady_clock> solve_start, solve_end, gmres_start, gmres_end;
+				std::chrono::duration<double> solve_elapsed, gmres_elapsed;
+				solve_start = std::chrono::steady_clock::now();
 				U.resize(n_totalvert,1);
 				scalar_type tol = descr.TOL;
 				std::cout << "[elliptic_problem] Starting GMRES routine..." << std::endl;
 				gmm::iteration iter(tol);
 				if (descr.BY_ITERATION)
 					iter.set_maxiter(descr.ITER);
-				size_t restart = 50;
+				size_t restart = descr.RESTART;
 				gmm::identity_matrix PR;
-				time_solve = clock();
+				gmres_start = std::chrono::steady_clock::now();
 				gmm::gmres(A, U, F_source, PR, restart, iter);
-				time_solve = clock() - time_solve;
-				log_data.push_back(std::make_pair("Time to GMRES convergence (seconds): ", static_cast<float>(time_solve)/CLOCKS_PER_SEC));
+				gmres_end = std::chrono::steady_clock::now();
+				gmres_elapsed = gmres_end - gmres_start;
+				log_data.push_back(std::make_pair("Time to GMRES convergence (seconds): ", gmres_elapsed.count()));
 				n_iteration = iter.get_iteration();
 				converged_by_tol = iter.converged();
-				time_tot = clock() - time_tot;
-				log_data.push_back(std::make_pair("Time to compute solution (seconds): ", static_cast<float>(time_tot)/CLOCKS_PER_SEC));
+				solve_end = std::chrono::steady_clock::now();
+				solve_elapsed = solve_end - solve_start;
+				log_data.push_back(std::make_pair("Time to compute solution (seconds): ", solve_elapsed.count()));
 				log_data.push_back(std::make_pair("Number of iterations: ", static_cast<float>(n_iteration)));
 			  	log_data.push_back(std::make_pair("Converged by tolerance condition: ", static_cast<float>(converged_by_tol)));
 			}
@@ -445,8 +449,9 @@ namespace getfem {
 			std::cout << "[elliptic_problem] Solving the problem via QMR algorithm..." << std::endl;
 			#endif
 			try {
-				clock_t time_solve,time_tot;
-				time_tot = clock();
+				std::chrono::time_point<std::chrono::steady_clock> solve_start, solve_end, qmr_start, qmr_end;
+				std::chrono::duration<double> solve_elapsed, qmr_elapsed;
+				solve_start = std::chrono::steady_clock::now();
 				U.resize(n_totalvert,1);
 				scalar_type tol = descr.TOL;
 				std::cout << "[elliptic_problem] Starting QMR routine..." << std::endl;
@@ -454,14 +459,15 @@ namespace getfem {
 				if (descr.BY_ITERATION)
 					iter.set_maxiter(descr.ITER);
 				gmm::identity_matrix PR;
-				time_solve = clock();
+				qmr_start = std::chrono::steady_clock::now();
 				gmm::qmr(A, U, F_source, PR, iter);
-				time_solve = clock() - time_solve;
-				log_data.push_back(std::make_pair("Time to QMR convergence (seconds): ", static_cast<float>(time_solve)/CLOCKS_PER_SEC));
+				qmr_end = std::chrono::steady_clock::now();
+				qmr_elapsed = qmr_end - qmr_start;
+				log_data.push_back(std::make_pair("Time to QMR convergence (seconds): ", qmr_elapsed.count()));
 				n_iteration = iter.get_iteration();
 				converged_by_tol = iter.converged();
-				time_tot = clock() - time_tot;
-				log_data.push_back(std::make_pair("Time to compute solution (seconds): ", static_cast<float>(time_tot)/CLOCKS_PER_SEC));
+				solve_elapsed = solve_end - solve_start;
+				log_data.push_back(std::make_pair("Time to compute solution (seconds): ", solve_elapsed.count()));
 				log_data.push_back(std::make_pair("Number of iterations: ", static_cast<float>(n_iteration)));
 				log_data.push_back(std::make_pair("Converged by tolerance condition: ", static_cast<float>(converged_by_tol)));
 			}
@@ -472,8 +478,9 @@ namespace getfem {
 			std::cout << "[elliptic_problem] Solving the problem via CG type algorithm..." << std::endl;
 			#endif
 			try {
-				clock_t time_solve,time_tot;
-				time_tot = clock();
+				std::chrono::time_point<std::chrono::steady_clock> solve_start, solve_end, cg_start, cg_end;
+				solve_start = std::chrono::steady_clock::now();
+				std::chrono::duration<double> solve_elapsed, cg_elapsed;
 				U.resize(n_totalvert,1);
 				scalar_type tol = descr.TOL;
 				std::cout << "[elliptic_problem] Starting CG type routine..." << std::endl;
@@ -493,15 +500,18 @@ namespace getfem {
 					std::cout << "[elliptic_problem] Using Standard CG..." << std::endl;
 					#endif
 					gmm::add(A,A_trans,A_sym);
-					gmm:scaled(A_sym,0.5);
-					time_solve = clock();
-					gmm::least_squares_cg(A_sym, U, F_source, iter);
-					time_solve = clock() - time_solve;
-					log_data.push_back(std::make_pair("Time to Standard CG convergence (seconds): ", static_cast<float>(time_solve)/CLOCKS_PER_SEC));
+					gmm::scaled(A_sym,0.5);
+					cg_start = std::chrono::steady_clock::now();
+					gmm::identity_matrix PR, PS;
+					gmm::cg(A_sym, U, F_source, PS, PR, iter);
+					cg_end = std::chrono::steady_clock::now();
+					cg_elapsed = cg_end - cg_start;
+					log_data.push_back(std::make_pair("Time to Standard CG convergence (seconds): ", cg_elapsed.count()));
 					n_iteration = iter.get_iteration();
 					converged_by_tol = iter.converged();
-					time_tot = clock() - time_tot;
-					log_data.push_back(std::make_pair("Time to compute solution (seconds): ", static_cast<float>(time_tot)/CLOCKS_PER_SEC));
+					solve_end = std::chrono::steady_clock::now();
+					solve_elapsed = solve_end - solve_start;
+					log_data.push_back(std::make_pair("Time to compute solution (seconds): ", solve_elapsed.count()));
 					log_data.push_back(std::make_pair("Number of iterations: ", static_cast<float>(n_iteration)));
 					log_data.push_back(std::make_pair("Converged by tolerance condition: ", static_cast<float>(converged_by_tol)));
 				}
@@ -509,15 +519,17 @@ namespace getfem {
 					#ifdef FEMG_VERBOSE_
 					std::cout << "[elliptic_problem] Using BiCGSTAB..." << std::endl;
 					#endif
-						gmm::identity_matrix PR;
-					time_solve = clock();
-						gmm::bicgstab(A, U, F_source, PR, iter);
-					time_solve = clock() - time_solve;
-					log_data.push_back(std::make_pair("Time to BiCGSTAB convergence (seconds): ", static_cast<float>(time_solve)/CLOCKS_PER_SEC));
+					gmm::identity_matrix PR;
+					cg_start = std::chrono::steady_clock::now();
+					gmm::bicgstab(A, U, F_source, PR, iter);
+					cg_end = std::chrono::steady_clock::now();
+					cg_elapsed = cg_end - cg_start;
+					log_data.push_back(std::make_pair("Time to BiCGSTAB convergence (seconds): ", cg_elapsed.count()));
 					n_iteration = iter.get_iteration();
 					converged_by_tol = iter.converged();
-					time_tot = clock() - time_tot;
-					log_data.push_back(std::make_pair("Time to compute solution (seconds): ", static_cast<float>(time_tot)/CLOCKS_PER_SEC));
+					solve_end = std::chrono::steady_clock::now();
+					solve_elapsed = solve_end - solve_start;
+					log_data.push_back(std::make_pair("Time to compute solution (seconds): ", solve_elapsed.count()));
 					log_data.push_back(std::make_pair("Number of iterations: ", static_cast<float>(n_iteration)));
 					log_data.push_back(std::make_pair("Converged by tolerance condition: ", static_cast<float>(converged_by_tol)));
 				}
@@ -529,21 +541,24 @@ namespace getfem {
 			std::cout << "[elliptic_problem] Solving the problem via SuperLU algorithm..." << std::endl;
 			#endif
 			try {
-				clock_t time_solve,time_tot;
-				time_tot = clock();
+				std::chrono::time_point<std::chrono::steady_clock> solve_start, solve_end, lu_start, lu_end;
+				std::chrono::duration<double> solve_elapsed, lu_elapsed;
+				solve_start = std::chrono::steady_clock::now();
 				U.resize(n_totalvert,1);
 				std::cout << "[elliptic_problem] Starting SuperLU routine..." << std::endl;
-				time_solve = clock();
+				lu_start = std::chrono::steady_clock::now();
 				SuperLU_solve(A, U, F_source, condest);
+				lu_end = std::chrono::steady_clock::now();
 				condest = 1/condest;
-				time_solve = clock() - time_solve;
-				log_data.push_back(std::make_pair("Time for SuperLU algorithm (seconds): ", static_cast<float>(time_solve)/CLOCKS_PER_SEC));
+				lu_elapsed = lu_end - lu_start;
+				log_data.push_back(std::make_pair("Time for SuperLU algorithm (seconds): ", lu_elapsed.count()));
 				#ifdef FEMG_VERBOSE_
 				std::cout << "[elliptic_problem] Condition number: " << condest << std::endl;
 				#endif
-				time_tot = clock() - time_tot;
-				log_data.push_back(std::make_pair("Time to compute solution (seconds): ", static_cast<float>(time_tot)/CLOCKS_PER_SEC));
-				log_data.push_back(std::make_pair("Inverse conditioning number estimate: ", condest));
+				solve_end = std::chrono::steady_clock::now();
+				solve_elapsed = solve_end - solve_start;
+				log_data.push_back(std::make_pair("Time to compute solution (seconds): ", solve_elapsed.count()));
+				log_data.push_back(std::make_pair("Condition number estimate: ", condest));
 			}
 			GMM_STANDARD_CATCH_ERROR;
 		}
@@ -557,14 +572,15 @@ namespace getfem {
 	void
 	elliptic_problem::sol_export(void)
 	{
-		// Temporary code.
+		#ifdef FEMG_VERBOSE_
 		std::cout << "[elliptic_problem] Printing solution..." << std::endl;
 		for(auto it = U.begin(); it != U.end(); it++)
 			std::cout << *it << std::endl;
 		// Number of vertices in the graph without the mesh
-		std::cout << "Number of original vertices: " << n_origvert << std::endl;
+		std::cout << "[elliptic_problem] Number of original vertices: " << n_origvert << std::endl;
 		// Number of vertices in the extended graph
-		std::cout << "Number of total vertices: " << n_totalvert << std::endl;
+		std::cout << "[elliptic_problem] Number of total vertices: " << n_totalvert << std::endl;
+		#endif
 
 		// Exporting routine to MATLAB interface.
 		// Executing this code requires GetFEM++-MATLAB interface and the boost::filesystem library.
@@ -586,7 +602,7 @@ namespace getfem {
 				std::cout << "[elliptic_problem] Warning: data in existing folder will be removed." << std::endl;
 				std::cout << "[elliptic_problem] Press Enter to continue..." << std::endl;
 				std::cin.ignore();
-				std::cin.ignore();
+				//std::cin.ignore();
 				ec.clear();
 				status = boost::filesystem::create_directories(dir, ec);
 				if ( status )

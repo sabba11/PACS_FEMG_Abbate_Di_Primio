@@ -20,6 +20,7 @@
 #include <iostream>
 #include <fstream>
 #include <time.h>
+#include <chrono>
 #include <boost/filesystem.hpp>
 #include <vector>
 #include <math.h>
@@ -36,80 +37,80 @@ namespace getfem {
 	void
 	eigen_problem::import_data()
 	{
-	    #ifdef FEMG_VERBOSE_
-	    std::cout << "[eigen_problem] Importing problem descriptors..." << std::endl;
-	    #endif
+		#ifdef FEMG_VERBOSE_
+		std::cout << "[eigen_problem] Importing problem descriptors..." << std::endl;
+		#endif
 
-	    descr.import_all(INPUT);
+		descr.import_all(INPUT);
 
-	    #ifdef FEMG_VERBOSE_
-	    std::cout << descr;
-	    #endif
+		#ifdef FEMG_VERBOSE_
+		std::cout << descr;
+		#endif
 	}
 
 	void
 	eigen_problem::build_mesh()
 	{
-        #ifdef FEMG_VERBOSE_
-        std::cout << "[eigen_problem] Importing mesh from data file..." << std::endl;
-        #endif
+		#ifdef FEMG_VERBOSE_
+		std::cout << "[eigen_problem] Importing mesh from data file..." << std::endl;
+		#endif
 
-        std::ifstream ifs(descr.MESH_FILEG);
-        GMM_ASSERT1(ifs.good(),"Unable to read from file " << descr.MESH_FILEG);
-        std::ifstream rad;
-        if (descr.IMPORT_RADIUS) {
-        	#ifdef FEMG_VERBOSE_
-        	std::cout << "[eigen_problem] Importing radii from data file... " << std::endl;
-        	#endif
+		std::ifstream ifs(descr.MESH_FILEG);
+		GMM_ASSERT1(ifs.good(),"Unable to read from file " << descr.MESH_FILEG);
+		std::ifstream rad;
+		if (descr.IMPORT_RADIUS) {
+			#ifdef FEMG_VERBOSE_
+			std::cout << "[eigen_problem] Importing radii from data file... " << std::endl;
+			#endif
 
-        	rad.open(descr.RFILE);
-        	GMM_ASSERT1(rad.good(), "Unable to read from file " << descr.RFILE);
-        }
-        import_pts_file(ifs, rad, descr.IMPORT_RADIUS);
+			rad.open(descr.RFILE);
+			GMM_ASSERT1(rad.good(), "Unable to read from file " << descr.RFILE);
+		}
+		import_pts_file(ifs, rad, descr.IMPORT_RADIUS);
 
-        	n_totalvert = meshg.nb_points();
+		n_totalvert = meshg.nb_points();
 
-        ifs.close();
-        if (descr.IMPORT_RADIUS)
-        	rad.close();
-        return;
+		ifs.close();
+		if (descr.IMPORT_RADIUS)
+			rad.close();
+		return;
 	}
 
 	void
 	eigen_problem::set_im_and_fem()
 	{
-        #ifdef FEMG_VERBOSE_
-        std::cout << "[eigen_problem] Setting GetFEM++ integration method..."<< std::endl;
-        #endif
+		#ifdef FEMG_VERBOSE_
+		std::cout << "[eigen_problem] Setting GetFEM++ integration method..."<< std::endl;
+		#endif
 
-        pintegration_method pim_g = int_method_descriptor(descr.IM_TYPEG);
-        mimg.set_integration_method(meshg.convex_index(), pim_g);
+		pintegration_method pim_g = int_method_descriptor(descr.IM_TYPEG);
+		mimg.set_integration_method(meshg.convex_index(), pim_g);
 
-        #ifdef FEMG_VERBOSE_
-        std::cout << "[eigen_problem] Setting GetFEM++ Finite Element method..." << std::endl;
-        #endif
+		#ifdef FEMG_VERBOSE_
+		std::cout << "[eigen_problem] Setting GetFEM++ Finite Element method..." << std::endl;
+		#endif
 
-        bgeot::pgeometric_trans pgt_g = bgeot::geometric_trans_descriptor(descr.MESH_TYPEG);
+		bgeot::pgeometric_trans pgt_g = bgeot::geometric_trans_descriptor(descr.MESH_TYPEG);
 
-        pfem pf_Ug = fem_descriptor(descr.FEM_TYPEG);
-        pfem pf_coeffg = fem_descriptor(descr.FEM_TYPEG_DATA);
+		pfem pf_Ug = fem_descriptor(descr.FEM_TYPEG);
+		pfem pf_coeffg = fem_descriptor(descr.FEM_TYPEG_DATA);
 
-        mf_Ug.set_finite_element(meshg.convex_index(), pf_Ug);
-        mf_coeffg.set_finite_element(meshg.convex_index(), pf_coeffg);
-        return;
+		mf_Ug.set_finite_element(meshg.convex_index(), pf_Ug);
+		mf_coeffg.set_finite_element(meshg.convex_index(), pf_coeffg);
+		return;
 	}
 
 	void
 	eigen_problem::set_default_coefficients(void)
 	{
-        #ifdef FEMG_VERBOSE_
-        std::cout << "[eigen_problem] Setting coefficients at default values..." << std::endl;
-        #endif
+		#ifdef FEMG_VERBOSE_
+		std::cout << "[eigen_problem] Setting coefficients at default values..." << std::endl;
+		#endif
 
-        left_weights = vector_type(n_totalvert, 1.0);
-        right_weights = vector_type(n_totalvert, 1.0);
-        potential = vector_type(n_totalvert, 0.0);
-        return;
+		left_weights = vector_type(n_totalvert, 1.0);
+		right_weights = vector_type(n_totalvert, 1.0);
+		potential = vector_type(n_totalvert, 0.0);
+		return;
 	}
 
   	//Builds coefficient vectors
@@ -310,21 +311,21 @@ namespace getfem {
 		M.resize(n_totalvert, n_totalvert);
 		getfem::asm_mass_matrix_param(M, mimg, mf_Ug, mf_coeffg, right_weights);
 		gmm::clean(M, 1E-10);
-        if (meshg.has_region(n_branches + 2)) {
-            #ifdef FEMG_VERBOSE_
-            std::cout << "[eigen_problem] Assembling Dirichlet boundary conditions..." << std::endl;
-            #endif
-            for (unsigned i = 0; i < BCg.size(); i++){
-                if (BCg[i].label == "DIR"){
-                    GMM_ASSERT1(BCg[i].value==0,"[eigen_problem] Non-zero Dirichlet Boundary Condition");
-                    for (unsigned j = 0; j < n_totalvert; j++){
-                        //M(j,BCg[i].idx) = 0.0;
-                        M(BCg[i].idx,j) = 0.0;
-                    }
-                    M(BCg[i].idx,BCg[i].idx) = 1.0;
-                }
-            }
-        }
+		if (meshg.has_region(n_branches + 2)) {
+		    #ifdef FEMG_VERBOSE_
+		    std::cout << "[eigen_problem] Assembling Dirichlet boundary conditions..." << std::endl;
+		    #endif
+		    for (unsigned i = 0; i < BCg.size(); i++){
+		        if (BCg[i].label == "DIR"){
+		            GMM_ASSERT1(BCg[i].value==0,"[eigen_problem] Non-zero Dirichlet Boundary Condition");
+		            for (unsigned j = 0; j < n_totalvert; j++){
+		                //M(j,BCg[i].idx) = 0.0;
+		                M(BCg[i].idx,j) = 0.0;
+		            }
+		            M(BCg[i].idx,BCg[i].idx) = 1.0;
+		        }
+		    }
+		}
 
 		return;
 	}
@@ -340,21 +341,21 @@ namespace getfem {
 		getfem::asm_mass_matrix_param(V, mimg, mf_Ug, mf_coeffg, potential);
 		A.resize(n_totalvert, n_totalvert);
 		gmm::add(L, V, A);
-        if (meshg.has_region(n_branches + 2)) {
-            #ifdef FEMG_VERBOSE_
-            std::cout << "[eigen_problem] Assembling Dirichlet boundary conditions..." << std::endl;
-            #endif
-            for (unsigned i = 0; i < BCg.size(); i++){
-                if (BCg[i].label == "DIR"){
-                    GMM_ASSERT1(BCg[i].value==0,"[eigen_problem] Non-zero Dirichlet Boundary Condition");
-                    for (unsigned j = 0; j < n_totalvert; j++){
-                        //A(BCg[i].idx,j) = 0.0;
-                        A(j,BCg[i].idx) = 0.0;
-                    }
-                    A(BCg[i].idx,BCg[i].idx) = 1.0;
-                }
-            }
-        }
+		if (meshg.has_region(n_branches + 2)) {
+		    #ifdef FEMG_VERBOSE_
+		    std::cout << "[eigen_problem] Assembling Dirichlet boundary conditions..." << std::endl;
+		    #endif
+		    for (unsigned i = 0; i < BCg.size(); i++){
+		        if (BCg[i].label == "DIR"){
+		            GMM_ASSERT1(BCg[i].value==0,"[eigen_problem] Non-zero Dirichlet Boundary Condition");
+		            for (unsigned j = 0; j < n_totalvert; j++){
+		                //A(BCg[i].idx,j) = 0.0;
+		                A(j,BCg[i].idx) = 0.0;
+		            }
+		            A(BCg[i].idx,BCg[i].idx) = 1.0;
+		        }
+		    }
+		}
 		return;
 	}
 
@@ -363,11 +364,14 @@ namespace getfem {
 	{
 		if (descr.COMP_METHOD == "QR") {
 			#ifdef FEMG_VERBOSE_
-			std::cout << "[eigen_problem] Solving the problem via QR algorithm..." << std::endl;
+			std::cout << "[eigen_problem] Solving the problem via implicit QR algorithm..." << std::endl;
 			#endif
 			try {
                 clock_t time_inverse, time_eig, time_tot, time_mult;
                 time_tot = clock();
+				std::chrono::time_point<std::chrono::steady_clock> cond_start, cond_end, inv_start, inv_end, eig_start, eig_end, mult_start, mult_end, solve_start, solve_end;
+				std::chrono::duration<double> inv_elapsed, eig_elapsed, mult_elapsed, solve_elapsed, cond_elapsed;
+				solve_start = std::chrono::steady_clock::now();
                 dense_matrix_type eigvects(n_totalvert, n_totalvert);
                 // Initial guess for all eigenvalues is 1.
                 complex_vector_type eigvals(n_totalvert, 1);
@@ -375,26 +379,32 @@ namespace getfem {
                 dense_matrix_type aux_H(n_totalvert, n_totalvert);
                 gmm::copy(M, inverse_mass);
                 gmm::copy(A, aux_H);
+				cond_start = std::chrono::steady_clock::now();
+				cond_elapsed = cond_end - cond_start;
                 scalar_type cond_number = gmm::condition_number(M);
+				cond_end = std::chrono::steady_clock::now();
+				log_data.push_back(std::make_pair("Time to compute condition number (seconds): ", cond_elapsed.count()));
                 std::cout << "[eigen_problem] The mass matrix M has condition number " << cond_number << std::endl;
-                time_inverse = clock();
+                inv_start = std::chrono::steady_clock::now();
                 gmm::lu_inverse(inverse_mass);
-                time_inverse = clock() - time_inverse;
-                log_data.push_back(std::make_pair("Time for matrix inversion (seconds): ", static_cast<float>(time_inverse)/CLOCKS_PER_SEC));
-                time_mult = clock();
+                inv_end = std::chrono::steady_clock::now();
+				inv_elapsed = inv_end - inv_start;
+                log_data.push_back(std::make_pair("Time for matrix inversion (seconds): ", inv_elapsed.count()));
+                mult_start = std::chrono::steady_clock::now();
                 gmm::mult(inverse_mass, aux_H, A);
-                time_mult = clock() - time_mult;
-                log_data.push_back(std::make_pair("Time for matrix multiplication (seconds): ", static_cast<float>(time_mult)/CLOCKS_PER_SEC));
-                std::cout << static_cast<float>(time_inverse)/CLOCKS_PER_SEC << std::endl;
+                mult_end = std::chrono::steady_clock::now();
+				mult_elapsed = mult_end - mult_start;
+                log_data.push_back(std::make_pair("Time for matrix multiplication (seconds): ", mult_elapsed.count()));
                 scalar_type tol = descr.TOL;
                 std::cout << "[eigen_problem] Starting QR routine..." << std::endl;
                 std::cout << "[eigen_problem] Working on " << n_totalvert << " degrees of freedom" <<std::endl;
                 dense_matrix_type dense_A(n_totalvert, n_totalvert);
                 gmm::copy(A, dense_A);
-                time_eig = clock();
+                eig_start = std::chrono::steady_clock::now();
                 gmm::geev_interface_right(dense_A, eigvals, eigvects);
-                time_eig = clock() - time_eig;
-                log_data.push_back(std::make_pair("Time to QR convergence (seconds): ", static_cast<float>(time_eig)/CLOCKS_PER_SEC));
+                eig_end = std::chrono::steady_clock::now();
+				eig_elapsed = eig_end - eig_start;
+                log_data.push_back(std::make_pair("Time to QR convergence (seconds): ", eig_elapsed.count()));
                 #ifdef FEMG_VERBOSE_
                 for (unsigned i = 0; i < log_data.size(); i++)
                 	std::cout << "[eigen_problem] " << log_data[i].first << log_data[i].second << std::endl;
@@ -410,8 +420,9 @@ namespace getfem {
                 	else
                 		std::cout << "[eigen_problem] Warning: complex eigenvalue ignored. Value: " << eigvals[i].real() << " + " << eigvals[i].imag() << "i" << std::endl;
                 }
-                time_tot = clock() - time_tot;
-                log_data.push_back(std::make_pair("Time to compute eigencouples (seconds): ", static_cast<float>(time_tot)/CLOCKS_PER_SEC));
+                solve_end = std::chrono::steady_clock::now();
+				solve_elapsed = solve_end - solve_start;
+                log_data.push_back(std::make_pair("Total time to perform solve() routine (seconds): ", solve_elapsed.count()));
 			}
 			GMM_STANDARD_CATCH_ERROR;
 		}
@@ -420,8 +431,9 @@ namespace getfem {
 			std::cout << "[eigen_problem] Solving the problem via QZ algorithm..." << std::endl;
 			#endif
 			try {
-                clock_t time_eig,time_tot;
-                time_tot = clock();
+                std::chrono::time_point<std::chrono::steady_clock> solve_start, solve_end, eig_start, eig_end;
+				std::chrono::duration<double> solve_elapsed, eig_elapsed;
+				solve_start = std::chrono::steady_clock::now();
                 dense_matrix_type eigvects(n_totalvert, n_totalvert);
                 // Initial guess for all eigenvalues is 1.
                 complex_vector_type eigvals(n_totalvert, 1);
@@ -435,7 +447,7 @@ namespace getfem {
                 gmm::dense_matrix<double> M_blas(n_totalvert, n_totalvert);
                 gmm::copy(M, M_blas);
                 std::vector<double> eigvr(n_totalvert), eigvi(n_totalvert), eigvden(n_totalvert);
-                time_eig = clock();
+                eig_start = std::chrono::steady_clock::now();
                 char boolleft = 'V';
                 char boolright = 'N';
                 dggev_(&boolleft, &boolright, &n_totalvert, &A_blas(0,0), &n_totalvert, &M_blas(0,0),
@@ -446,6 +458,8 @@ namespace getfem {
                 dggev_(&boolleft, &boolright, &n_totalvert, &A_blas(0,0), &n_totalvert, &M_blas(0,0),
                     &n_totalvert, &eigvr[0], &eigvi[0], &eigvden[0],
                         &eigvects(0,0), &n_totalvert, &eigvects(0,0), &n_totalvert, &work[0], &lwork, &info);
+				eig_end = std::chrono::steady_clock::now();
+				eig_elapsed = eig_end - eig_start;
                 GMM_ASSERT1(!info, "QZ algorithm failed");
                 for (unsigned i=0; i<n_totalvert; i++){
                 		eigvi[i] = eigvi[i]/eigvden[i];
@@ -453,8 +467,7 @@ namespace getfem {
                 }
                 gmm::copy(eigvr, gmm::real_part(const_cast<complex_vector_type &>(eigvals)));
                 gmm::copy(eigvi, gmm::imag_part(const_cast<complex_vector_type &>(eigvals)));
-                time_eig = clock() - time_eig;
-                log_data.push_back(std::make_pair("Time to QZ convergence (seconds): ", static_cast<float>(time_eig)/CLOCKS_PER_SEC));
+                log_data.push_back(std::make_pair("Time to QZ convergence (seconds): ", eig_elapsed.count()));
                 #ifdef FEMG_VERBOSE_
                 for (unsigned i = 0; i < log_data.size(); i++)
                 	std::cout << "[eigen_problem] " << log_data[i].first << log_data[i].second << std::endl;
@@ -470,8 +483,9 @@ namespace getfem {
                 	else
                 		std::cout << "[eigen_problem] Warning: complex eigenvalue ignored. Value: " << eigvals[i].real() << " + " << eigvals[i].imag() << "i" << std::endl;
                 }
-                time_tot = clock() - time_tot;
-                log_data.push_back(std::make_pair("Time to compute eigencouples (seconds): ", static_cast<float>(time_tot)/CLOCKS_PER_SEC));
+                solve_end = std::chrono::steady_clock::now();
+				solve_elapsed = solve_end - solve_start;
+                log_data.push_back(std::make_pair("Total time to perform solve() routine (seconds): ", solve_elapsed.count()));
 			}
 			GMM_STANDARD_CATCH_ERROR;
 		}
@@ -485,14 +499,15 @@ namespace getfem {
 	void
 	eigen_problem::sol_export(void)
 	{
-	// Temporary code.
+		#ifdef FEMG_VERBOSE_
 		std::cout << "[eigen_problem] Printing eigenvalues..." << std::endl;
 		for(auto it = eigpairs.begin(); it != eigpairs.end(); it++)
-		   std::cout << it->first << std::endl;
+			std::cout << it->first << std::endl;
 		// Number of vertices in the graph without the mesh
 		std::cout << "Number of original vertices: " << n_origvert << std::endl;
 		// Number of vertices in the extended graph
 		std::cout << "Number of total vertices: " << n_totalvert << std::endl;
+		#endif
 
 		// Exporting routine to MATLAB interface.
 		// Executing this code requires GetFEM++-MATLAB interface and the boost::filesystem library.
@@ -516,7 +531,7 @@ namespace getfem {
 				std::cout << "[eigen_problem] Warning: data in existing folder will be removed." << std::endl;
 				std::cout << "[eigen_problem] Press Enter to continue..." << std::endl;
 				std::cin.ignore();
-				std::cin.ignore();
+				//std::cin.ignore();
 				ec.clear();
 				status = boost::filesystem::create_directories(dir, ec);
 				if ( status )
