@@ -1,16 +1,16 @@
 # Location of BGLgeom library
-BGLGEOM_DIR = /home/sguillo/Documents/Vecchi_progetti/Pacs_BGLgeom_Ilaria_Mattia-master/Install
+BGLGEOM_DIR = 
 
 # Location of Boost library
-export mkBGLInc = /u/sw/pkgs/toolchains/gcc-glibc/7/pkgs/boost/1.63.0/include
+export mkBGLInc = 
 
 # Path to Eigen includes
-export mkEigenInc =   /home/sguillo/Documents/eigen/eigen
+export mkEigenInc =   
 
 # Path to GetFEM library
-GETFEM_LIB_DIR   = /usr/local/lib
+GETFEM_LIB_DIR   = 
 # Path to GetFEM includes
-GETFEM_INC_DIR   = /usr/local/include/getfem
+GETFEM_INC_DIR   = 
 # Path to Eigen includes
 EIGEN_INC_DIR    = $(mkEigenInc)
 # Path to BGL includes

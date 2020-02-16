@@ -1,5 +1,5 @@
 # Directory where the project resides.
-PROJECT_DIR = /home/sguillo/Documents/PACS_FEMG_Abbate_Di_Primio
+PROJECT_DIR = 
 
 # Installation path  
 INSTALL_PATH = $(PROJECT_DIR)/install
@@ -11,14 +11,14 @@ DOC_PATH = $(PROJECT_DIR)/doc
 FEMG_DIR = $(PROJECT_DIR)/FEMG
 
 # Path to GetFEM library
-GETFEM_LIB_DIR   = /usr/local/lib
+GETFEM_LIB_DIR   = 
 # Path to GetFEM includes
-GETFEM_INC_DIR   = /usr/local/include/getfem
+GETFEM_INC_DIR   = 
 # Path to BGL includes
 BGL_INC_DIR      = $(mkBGLInc)
 
 # Location of Boost library
-export mkBGLInc = /u/sw/pkgs/toolchains/gcc-glibc/7/pkgs/boost/1.63.0/include
+export mkBGLInc = 
 
 # Collect all includes
 ALL_INC_DIR= $(GETFEM_INC_DIR) $(BGL_INC_DIR)
