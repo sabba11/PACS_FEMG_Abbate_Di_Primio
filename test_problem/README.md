@@ -9,7 +9,8 @@ The lower level directories of the `/eigen` and `/elliptic` folders are:
  - `/laplacian` subfolder: contains code and setup files to treat the standard Laplacian case.
  - `/hamiltonian` subfolder: contains code and setup files to treat the simple Hamiltonian case (unitary potential).
  - `/potential` subfolder: contains code and setup files to treat the general Hamiltonian case.
-These subfolders contain Makefiles for compilation and the source file `main.cpp` which, after compilation, generates the executable file, called `main`. Users should use the external Makefile routine to compile the code.
+ 
+These subfolders also contain Makefiles for compilation and the source file `main.cpp` which, after compilation, generates the executable `main`. Users should use the external Makefile routine to compile the code.
 
 In order to run the executables from a terminal session, move in one of the lower level directories of the `/eigen` and `/elliptic` folders and execute the command
 
