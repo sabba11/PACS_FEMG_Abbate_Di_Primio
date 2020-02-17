@@ -41,7 +41,7 @@ namespace getfem {
 		scalar_type ITER = 0;
 
 		//! Restart parameters for GMRES method
-		int restart;
+		int RESTART;
 
 	protected:
 		//! Overridden import() method to define custom descriptors.

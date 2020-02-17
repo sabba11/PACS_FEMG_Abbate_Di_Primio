@@ -20,7 +20,7 @@ namespace getfem {
 				ITER = FILE_.int_value("ITER", "Maximum iteration");
 		}
 		if (COMP_METHOD == "GMRES"){
-			RESTART = FILE_.int_value("RESTART", "Restart parameter for GMRES")
+			RESTART = FILE_.int_value("RESTART", "Restart parameter for GMRES");
 		}
 		GMM_ASSERT1(elliptic_check_validity(), "Invalid COMP_METHOD, TOL or ITER in .param file.");
 		return;
@@ -34,6 +34,7 @@ namespace getfem {
 		if (COMP_METHOD != "LU")
 			check2 = (TOL > 0);
 		bool check3 = true;
+		bool check4 = true;
 		if (COMP_METHOD != "LU" && BY_ITERATION)
 			check3 = (ITER > 0);
 		if (COMP_METHOD == "GMRES")
