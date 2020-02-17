@@ -14,15 +14,21 @@ override CPPFLAGS := $(CPPFLAGS) $(INCLUDES) -D GMM_USES_LAPACK
 .DEFAULT_GOAL: help
 
 help:
-	@echo "make help: ----- Prints this help"
-	@echo "make all: ------ Makes libraries, tests and documentation"
-	@echo "make static: --- Makes static library and executable"
-	@echo "make dynamic: -- Makes dynamic library and executable"
-	@echo "make library: -- Makes both static and dynamic libraries"
-	@echo "make install: -- Installs the libaries"
-	@echo "make clean: ---- Cleans all object files"
-	@echo "make distclean:  Cleans all"
-	
+	@echo "Usage: make [option] keyword"
+	@echo " "
+	@echo "List of possible keywords:"
+	@echo "help: ----- Prints this help"
+	@echo "all: ------ Makes libraries, tests and documentation"
+	@echo "static: --- Makes static library and executable"
+	@echo "dynamic: -- Makes dynamic library and executable"
+	@echo "library: -- Makes both static and dynamic libraries"
+	@echo "install: -- Installs the libaries"
+	@echo "clean: ---- Cleans all object files"
+	@echo "distclean:  Cleans all"
+	@echo " "
+	@echo "List of possible options:"
+	@echo "CPPFLAGS+=-DFEMG_VERBOSE_: Let user compile in verbose mode"
+
 all: library install clean
 
 library: static dynamic

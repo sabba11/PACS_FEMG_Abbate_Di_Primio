@@ -9,16 +9,22 @@ override CPPFLAGS := $(CPPFLAGS) $(INCLUDES) -DGMM_USES_LAPACK
 .DEFAULT_GOAL = all 
 
 help:
-	@echo "make help: ------- Prints this help"
-	@echo "make doc: -------- Builds Doxygen documentation"
-	@echo "make all: -------- Makes libraries, test problems and the data builder"
-	@echo "make library: ---- Makes both static and dynamic libraries"
-	@echo "make eigen: ------ Builds eigen problems - library needed"
-	@echo "make elliptic: --- Builds elliptic problems - library needed"
-	@echo "make graph_maker:  Makes the code that can be used to build *.pts files"
-	@echo "make resultclean:  Cleans all the exported files"
-	@echo "make clean: ------ Cleans all object files"
-	@echo "make distclean: -- Cleans all"
+	@echo "Usage: make [option] keyword"
+	@echo " "
+	@echo "List of possible keywords:"
+	@echo "help: ------- Prints this help"
+	@echo "doc: -------- Builds Doxygen documentation"
+	@echo "all: -------- Makes libraries, test problems and the data builder"
+	@echo "library: ---- Makes both static and dynamic libraries"
+	@echo "eigen: ------ Builds eigen problems - library needed"
+	@echo "elliptic: --- Builds elliptic problems - library needed"
+	@echo "graph_maker:  Makes the code that can be used to build *.pts files"
+	@echo "resultclean:  Cleans all the exported files"
+	@echo "clean: ------ Cleans all object files"
+	@echo "distclean: -- Cleans all"
+	@echo " "
+	@echo "List of possible options:"
+	@echo "CPPFLAGS+=-DFEMG_VERBOSE_: Let user compile in verbose mode"
 
 all: graph_maker library eigen elliptic doc clean
 
