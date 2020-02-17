@@ -47,6 +47,8 @@ Then, in libBGLgeom/Makefile:
 
 3. `-soname` in place of `-$(SONAME)` at line 62.
 
+A known issue involves the installation of the GetFEM++-MATLAB interface. In the file getfem-5.3/interface/src/matlab/gfm_commmon.c comment lines 45 and 107, both referring to `mxSPARSE_CLASS`. This only concerns the execution of the MATLAB routines provided in this repository. 
+
 ## Execution and postprocessing
 For details on how to execute the code and postprocess the results, refer to the `README.md` in the `test_problem` folder.
 
