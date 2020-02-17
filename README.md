@@ -31,7 +31,13 @@ To build the library, firstly fill the files Makefile.inc and data_builder/graph
 `$ make all`  
 to compile the whole project in the specified installation folder. Partial compilations can be made, type   
 `$ make help`  
-for the list of possible keywords.  
+for the list of possible keywords.
+
+To compile the code in verbose mode, use  
+`$ make CPPFLAGS+=-DFEMG_VERBOSE_ all` 
+
+Code documentation will be generated in both html and LaTeX format (LaTeX compiler eventually needed). To this end, alongside `doxygen`, the `graphviz` package is also needed.
+
 #### Installation issues
 A known installation issue in Linux involves BGL library linking. A workaround is to modify the Linux environment variable `LD_LIBRARY_PATH`, so to include the path to the Boost `lib` folder. This can be achieved through the command  
 `$ export LD_LIBRARY_PATH=path/to/boost/lib:$LD_LIBRARY_PATH`  
@@ -49,6 +55,7 @@ Then, in libBGLgeom/Makefile:
 
 A known issue involves the installation of the GetFEM++-MATLAB interface. In the file getfem-5.3/interface/src/matlab/gfm_commmon.c comment lines 45 and 107, both referring to `mxSPARSE_CLASS`. This only concerns the execution of the MATLAB routines provided in this repository. 
 
+A known issue involves the usage of modules to load libraries. The code has been tested installing the external dependencies locally.
 ## Execution and postprocessing
 For details on how to execute the code and postprocess the results, refer to the `README.md` in the `test_problem` folder.
 
