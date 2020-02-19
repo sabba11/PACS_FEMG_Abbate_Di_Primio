@@ -531,7 +531,7 @@ namespace getfem {
 				std::cout << "[eigen_problem] Warning: data in existing folder will be removed." << std::endl;
 				std::cout << "[eigen_problem] Press Enter to continue..." << std::endl;
 				std::cin.ignore();
-				//std::cin.ignore();
+				std::cin.ignore();
 				ec.clear();
 				status = boost::filesystem::create_directories(dir, ec);
 				if ( status )
