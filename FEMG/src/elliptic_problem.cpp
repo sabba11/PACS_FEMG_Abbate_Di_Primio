@@ -369,9 +369,6 @@ namespace getfem {
 			for (unsigned i = 0; i < BCg.size(); i++)
 				if (BCg[i].label == "DIR")
 					R_dir[BCg[i].idx] = BCg[i].value;
-			std::cout << "DIR BC:" << std::endl;
-		  	for (unsigned i = 0; i < R_dir.size(); i++)
-				std::cout << R_dir[i] << std::endl;
 			getfem::assembling_Dirichlet_condition(A, F_source, mf_Ug, n_branches + 2, R_dir);
 		}
 		return;
