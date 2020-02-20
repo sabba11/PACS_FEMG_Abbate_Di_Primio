@@ -33,8 +33,7 @@ BY_ITERATION = 0
 % Number (only needed in the case of by iteration = true)
 MAX_ITER  = 1000;
 % Restart parameter (only needed when using the GMRES method)
-% RESTART = 0 corresponds to the standard GMRES method
-RESTART = 0;
+RESTART = 50;
 %=================================================================
 % PROBLEM FLAGS (consider only the problem of interest)
 %=================================================================
