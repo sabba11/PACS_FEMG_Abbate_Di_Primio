@@ -3,6 +3,8 @@ Coding a library to define, analyze and solve differential problems on graphs.
 
 This work is the final project for the course in Advanced Programming for Scientific Computing (a.y. 2018/19) held at Politecnico di Milano (Milan, Italy).
 
+The repository contains a report with some detailed theoretical and numerical analysis made by the two authors on differential problem on graphs. Particular attention is given to eigenvalue problems.
+
 Authors:  
 Stefano Abbate (stefano.abbate@mail.polimi.it)  
 Andrea Di Primio (andrea.diprimio@mail.polimi.it)
